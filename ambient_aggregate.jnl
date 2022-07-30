@@ -1,0 +1,17 @@
+cancel mode verify
+
+! Aggregate a set of monthly data files into a single time series.
+
+
+let filelist = spawn("ls -1 data/ambient-weather-202*.nc")
+! list filelist
+
+! Define the aggregation - cancel first if it's already defined
+
+IF `outdoor_temperature,return=isready` THEN cancel data ambient
+
+tseries ambient = filelist
+show data/brief
+
+! plot outdoor_temperature
+

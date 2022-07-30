@@ -1,0 +1,28 @@
+define symbol dataset = ($1)
+use ($dataset)
+
+list/norow ..varnames
+
+
+set mode ignore
+
+let status = nco_attr ("($dataset)", "OUTDOOR_TEMPERATURE", "units", "c", "o", "Deg F")
+load status
+let status = nco_attr ("($dataset)", "FEELS_LIKE", "units", "c", "o", "Deg F")
+load status
+let status = nco_attr ("($dataset)", "DEW_POINT", "units", "c", "o", "Deg F")
+load status
+let status = nco_attr ("($dataset)", "INDOOR_TEMPERATURE", "units", "c", "o", "Deg F")
+load status
+
+let status = nco_attr ("($dataset)", "HOURLY_RAIN", "units", "c", "o", "Inch")
+load status
+let status = nco_attr ("($dataset)", "DAILY_RAIN", "units", "c", "o", "Inch")
+load status
+let status = nco_attr ("($dataset)", "EVENTRAIN", "units", "c", "o", "Inch")
+load status
+
+let status = nco_attr ("($dataset)", "RELATIVE_PRESSURE", "units", "c", "o", "Hg")
+load status
+let status = nco_attr ("($dataset)", "OUTDOOR_HUMIDITY", "units", "c", "o", "Percent")
+load status

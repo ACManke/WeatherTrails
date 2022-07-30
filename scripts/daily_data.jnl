@@ -1,0 +1,37 @@
+ ! NOAA/PMEL TMAP
+ ! PyFerret v7.65 (debug)
+ ! Linux 4.4.0-22000-Microsoft - 04/18/22
+ ! 17-May-22 18:28     
+
+set mode verify
+can mode logo
+set win/siz=2/asp=0.5
+
+go ambient_aggregate.jnl
+sh dat
+
+LET tt = t[gt=outdoor_temperature]
+LET nt = `tt,return=size`
+LET firsty = `tax_datestring(tt[L=1], tt, "year")`
+LET lasty_s = tax_datestring(tt[L=`nt`], tt, "year")
+LET lasty = `lasty_s`
+LET ny = lasty - firsty + 1
+
+let lasty_s = tax_datestring(tt[L=`nt`], tt, "month")
+
+let day = 30
+if `STRINDEX(lasty_s, "FEB") GT 0` then let day = 28
+define axis/t=1-`tax_datestring(tt[L=1], tt, "month")`:`day`-`lasty_s`:1/units=days tday
+
+
+let/like=outdoor_temperature/title="Min daily temp" out_temp_min = outdoor_temperature[gt=tday@min]
+let/like=outdoor_temperature/title="Max daily temp" out_temp_max= outdoor_temperature[gt=tday@max]
+
+set view upper
+plot/color/key=title out_temp_min, out_temp_max
+pause
+
+plot/color=blue/key=title/t=1-jul-2020:15-may-2022 out_temp_max - out_temp_min
+stat out_temp_max - out_temp_min
+
+

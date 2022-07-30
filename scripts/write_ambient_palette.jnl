@@ -1,0 +1,35 @@
+
+! Define colors to show year by year data
+! Colors based on the color palette ten_reordered_levels.spk
+! Define these color symbols with no spaces so they can be passed
+! as an argument to month_rain.jnl
+
+define symbol color1 = (0,0,100) 
+define symbol color2 = (100,50,10)
+define symbol color3 = (0,70,20)
+define symbol color4 = (60,0,100) 
+define symbol color5 = (0,90,90)
+define symbol color6 = (100,10,0)
+define symbol color7 = (100,0,100)
+
+define symbol name1 = blue
+define symbol name2 = orange 
+define symbol name3 = green
+define symbol name4 = purple
+define symbol name5 = turquoise
+define symbol name6 = red
+define symbol name7 = magenta
+
+! Create a color-palette file, with the same blue and purple colors:
+
+say/clobber/outfile=ambient_palette.spk RGB_Mapping By_level
+say/append/outfile=ambient_palette.spk    
+say/append/outfile=ambient_palette.spk  1   0   0 100   ! blue
+say/append/outfile=ambient_palette.spk  2 100  50  10   ! orange
+say/append/outfile=ambient_palette.spk  3   0  70  20   ! green
+say/append/outfile=ambient_palette.spk  4  60   0 100   ! purple
+say/append/outfile=ambient_palette.spk  5   0  90  90   ! turquoise
+say/append/outfile=ambient_palette.spk  6 100  10   0   ! bright red
+say/append/outfile=ambient_palette.spk  7 100  0  100   ! magenta
+
+define symbol palette_name = ambient_palette
