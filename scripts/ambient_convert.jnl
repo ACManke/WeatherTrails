@@ -5,7 +5,7 @@
 !   - Select the date range, the first through end of the month, then click the symbol just below 
 !      the dates with the upward-pointing arrow.  This is "Download". Saveas a comma-separated file.
 
-! Save to Unix folder ~ansley/ambient//data/
+! Save to Unix folder ~ansley/ambient/data/
 ! Look at the file permissions, will need to change them to rw
 ! 
 ! They come out in reverse time order most-recent-first.
