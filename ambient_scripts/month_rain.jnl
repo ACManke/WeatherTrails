@@ -1,0 +1,68 @@
+! Plot monthly accumulation of rain
+
+let year = $1
+define symbol color = ($2)
+
+let tt = t[gt=tday]
+let jan_1 = tt[t=1-jan-`year`]
+let feb_1 = tt[t=1-feb-`year`]
+let mar_1 = tt[t=1-mar-`year`]
+let apr_1 = tt[t=1-apr-`year`]
+let may_1 = tt[t=1-may-`year`]
+let jun_1 = tt[t=1-jun-`year`]
+let jul_1 = tt[t=1-jul-`year`]
+let aug_1 = tt[t=1-aug-`year`]
+let sep_1 = tt[t=1-sep-`year`]
+let oct_1 = tt[t=1-oct-`year`]
+let nov_1 = tt[t=1-nov-`year`]
+let dec_1 = tt[t=1-dec-`year`]
+
+define symbol do_axs = /noax
+IF `year EQ firsty` then define symbol do_axs = /axes
+
+
+plot/line/set/t=1-jan-`year`:31-dec-`year`/vlim=`ax_lo`:`month_max`/title="($plot_title)"($do_axs) day_rain+1000
+   IF ($labnum_year%0|*>1%) THEN go unlabel ($lab($labnum_year))
+   IF ($labnum_dset%0|*>1%) THEN go unlabel ($lab($labnum_dset))
+   ppl plot
+
+let jan= if t[gt=day_rain] ge `jan_1` and t[gt=day_rain] lt `feb_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-jan-`year`:1-feb-`year` jan
+
+let feb= if t[gt=day_rain] ge `feb_1` and t[gt=day_rain] lt `mar_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-feb-`year`:1-mar-`year` feb
+
+let mar= if t[gt=day_rain] ge `mar_1` and t[gt=day_rain] lt `apr_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-mar-`year`:1-apr-`year` mar
+
+let apr= if t[gt=day_rain] ge `apr_1` and t[gt=day_rain] lt `may_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-apr-`year`:1-may-`year` apr
+
+let may= if t[gt=day_rain] ge `may_1` and t[gt=day_rain] lt `jun_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-may-`year`:1-jun-`year` may
+
+let jun= if t[gt=day_rain] ge `jun_1` and t[gt=day_rain] lt `aug_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-jun-`year`:1-aug-`year` jun
+
+let aug = if t[gt=day_rain] ge `aug_1` and t[gt=day_rain] lt `sep_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-aug-`year`:1-sep-`year` aug
+
+let sep = if t[gt=day_rain] ge `sep_1` and t[gt=day_rain] lt `oct_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-sep-`year`:1-oct-`year` sep
+
+let oct = if t[gt=day_rain] ge `oct_1` and t[gt=day_rain] lt `nov_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-oct-`year`:1-nov-`year` oct
+
+let nov = if t[gt=day_rain] ge `nov_1` and t[gt=day_rain] lt `dec_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-nov-`year`:1-dec-`year` nov
+
+let jan_1 = tt[t=1-jan-`year+1`]
+let dec = if t[gt=day_rain] ge `dec_1` and t[gt=day_rain] lt `jan_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-dec-`year`:1-jan-`year+1` dec
+
+! Block out the year labels
+define view/axes/x=0.45:0.55/y=0.08:0.11 block
+set view block
+shade/nolab/noax/pal=white/x=0:5/y=0:5/nokey x+y
+
+! IF `($yy) LT ny` THEN sp sleep 1
