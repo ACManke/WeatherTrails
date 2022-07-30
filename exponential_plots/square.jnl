@@ -1,0 +1,56 @@
+!   
+
+can mode logo
+set mode verify
+set text/font="Consolas"
+
+cancel memory
+
+! Draw a circle in a square window
+
+let pi = atan(1.)*4
+let deg2rad = pi/180
+let theta = i[i=1:361]* deg2rad
+let r = 1
+let xx = r * cos(theta)
+let yy = r * sin(theta)
+! plot/vs/line/thick=3/nolab/hlim=-1:1/vlim=-1:1/noax xx,yy
+
+let base = 2
+let expon = 16
+
+set win/aspect=1/size=2
+
+go margins 0.5, 0.5, 0.2, 0.8
+
+let xx = {-1.02,1.02,1.02,-1.02,-1.02}
+let yy = {-1.02,-1.02,1.02,1.02,-1.02}
+plot/vs/line/thick=3/nolab/hlim=-1.1:1.1/vlim=-1.1:1.1/noax xx,yy
+
+annotate/norm/xpos=0.5/ypos=1/halign=0/siz=0.2 "Exponential Growth, Doubling at Each Step"
+
+let big = base ^ expon
+
+
+LET xpts = 2*RANDU2(j[j=1:`big`]+0, -1) - 1	! random X coordinates
+LET ypts = 2*RANDU(j[j=1:`big`]+1) - 1	! random Y coordinates
+LET values = MOD( j[j=1:`big`],10)	! value at each (x,y) point
+
+palette ten_by_levels
+
+let ex = 2
+let exlast = 1
+let xp = 1.08
+let yp = 0.94
+let asize = 0.12
+
+repeat/range=1:`expon`/name=q (\
+define symbol q = `q`;\
+LET values = mod(`q` + j[j=1:`ex`],10);\
+plot/over/vs/ribbon/sym=circfill/siz=0.2/lev=(0,10,1)/j=`exlast`:`ex`/nolab/noax xpts,ypts,values;\
+ANNOTATE/NORM/xpos=`xp`/ypos=`yp`/halign=1/siz=`asize` "`base`<sup>`q`</sup> = `ex`";\
+let exlast = `ex+1`;\
+let ex = `2 * ex`;\
+let yp = `yp - 0.035`;\
+IF `q LT expon` then pause)
+

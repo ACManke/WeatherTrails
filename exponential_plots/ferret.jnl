@@ -1,0 +1,24 @@
+ ! NOAA/PMEL TMAP
+ ! PyFerret v7.65 (optimized)
+ ! Linux 4.4.0-22000-Microsoft - 12/29/21
+ ! 17-Apr-22 20:16     
+
+set mode verify
+go all linear
+set window/new; go all quad
+set window/new; go all exp
+go all exponential.jnl
+lits 2 ^ 16
+list 2 ^ 16
+set win/new/asp=0.7
+plot/step/line/sym/color=blue/thick/i=0:16 2*x
+plot/step=connected/line/sym/color=blue/thick/i=0:16 2*x
+plot/step=connected/line/sym/color=blue/thick/i=0:16/vlim=0:36 2*x
+list/x=1:16 2*x
+plot/step=connected/line/sym/color=blue/thick/x=1:16/vlim=0:36 2*x
+plot/step=connected/line/sym/color=blue/thick/x=1:16/vlim=0:36/hlim=0:16 2*x
+plot/line/sym/color=blue/thick/x=1:16/vlim=0:36/hlim=0:16 2*x
+plot/line/sym/color=blue/thick/x=1:16 2*x
+plot/line/sym/color=blue/thick/x=1:16 x*x
+plot/line/sym/color=blue/thick/x=1:16 2 ^ x
+q

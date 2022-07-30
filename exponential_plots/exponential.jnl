@@ -1,0 +1,61 @@
+!   
+
+can mode logo
+set mode verify
+set text/font="Consolas"
+
+cancel memory
+
+set win/aspect=1/size=2
+go margins 0.7, 0.5, 0.1, 1.1
+go margins 1, 1, 0.8, 1.2
+
+! Draw a circle in a square window
+
+let pi = atan(1.)*4
+let deg2rad = pi/180
+let theta = i[i=1:361]* deg2rad
+let r = 1
+let xx = r * cos(theta)
+let yy = r * sin(theta)
+plot/vs/line/thick=3/nolab/hlim=-1:1/vlim=-1:1/noax xx,yy
+
+let base = 2
+let expon = 15
+
+annotate/norm/xpos=0.5/ypos=1.04/halign=0/siz=0.2 "Exponential Growth, Doubling at Each Step"
+
+let big = base ^ expon
+
+! How to generate a random point within a circle of radius R = 0.98
+let r = 0.98
+let rpts = r* (RANDU2(j[j=1:`big`],-1)) ^ 0.5
+let theta = RANDU(j[j=1:`big`]) * 2 * pi
+
+! Convert this to Cartesian coordinates, you can do
+
+let xpts = rpts * COS(theta)
+let ypts = rpts * SIN(theta)
+
+LET values = MOD( j[j=1:`big`],10)	! value at each (x,y) point
+
+palette ten_by_levels
+
+let exlast = 1
+let ex = 2
+let xp = 1.12  ! for /halign=1
+let xp = 1.02
+let yp = 0.94
+let ydel = 0.04
+let asize = 0.12
+
+repeat/range=1:`expon`/name=q (\
+define symbol q = `q`;\
+LET values = mod(`q` + j[j=1:`ex`],10);\
+plot/over/vs/ribbon/sym=circfill/siz=0.2/lev=(0,10,1)/j=`exlast`:`ex`/nolab/noax xpts,ypts,values;\
+ANNOTATE/NORM/xpos=`xp`/ypos=`yp`/halign=-1/siz=`asize` "`base`<sup>`q`</sup> = `ex`";\
+let exlast = `ex+1`;\
+let ex = `2 * ex`;\
+let yp = `yp - ydel`;\
+IF `q LT expon` then pause)
+
