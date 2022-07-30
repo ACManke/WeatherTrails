@@ -1,0 +1,350 @@
+! color_datekey.jnl
+\cancel mode verify
+!
+! set up date/time labels for the color key when a plot is colored by a time variable.
+!
+! Revisions: 12/2021 ACM 
+!  - Handle the case of a 2-D plot where the color fill is a variable representing time.
+!  - New examples and common naming of variables and symbols
+!
+! The script pdatekey_dms is called by both polymark_datekey and color_datekey
+! 3/2022 change the variable-naming prefix to DK for DateKey
+!
+! Arguments 
+
+!  1 "V" OR "H" for a vertical or horizontal key
+!  2 variable describing the colored-by-time data, e.g.
+!      *  a time variable from a DSG dataset, with time units and a time-origin attribute,
+!      *  or let timepts = t[gt=timeaxis]
+!  3 optional: hr, min, sec to force hour:min and/or :sec on the time labels.
+!
+!  *** NOTE *** This script is run when drawing an overlay plot.  It requires a full plot of 
+!  the region to have been drawn so it can use automatically generated symbols so it
+!  can locate the plot-key labels. It is run after PLOT/SET has been issued
+! The underlay plot should be drawn without a color key; use the /NOKEY qualifier. 
+! The PLOT/OVER, SHADE/OVER or FILL/OVER command must include the qualifier /KEY
+
+! Examples:
+!
+!   Plot tracklines colored by time. In this DSG dataset "time" is the time coordinate variable
+!
+!  USE dsg_trajectory_example.nc  
+!  GO basemap X=136:238 Y=34:75 5
+!  PLOT/OVER/THICK=3/NOLAB/KEY/SET time
+!   GO color_datekey "H" time
+!  PPL PLOT/OVER
+!
+!    For a vertical key, define a viewport in order to leave space for the labels
+!    (A viewport is better than using the script go margins"; as a vertical colorbar will 
+!      automatically become wider in a wide margin.)
+!
+! DEFINE VIEWPORT/X=0:0.8/Y=0:1 xyview
+! SET VIEW xyview
+!
+! USE dsg_trajectory_example.nc
+! GO basemap X=136:238 Y=34:75 5
+! PLOT/OVER/THICK=3/NOLAB/KEY/SET time
+!  GO color_datekey "v" time
+! PPL PLOT/OVER
+!
+!    For 2-D data colored by time, be sure that the variable has unit of "time-units since time-origin",
+! 
+!    Define an example variable on an XY grid. The variable to be color-filled has units of time since origin
+!
+! DEFINE AXIS/X=20:30:0.5/UNITS=degrees_east xaxis
+! DEFINE AXIS/Y=-10:10:0.5/UNITS=degrees_north yaxis
+! LET/UNITS="days since 1-may-2000" my_time = 10*randu(i[gx=xaxis]) + 15*randu(j[gy=yaxis])
+! 
+! This plot sets up the required location information so that the date labels can be dran
+!  SHADE/NOKEY my_time  
+! 
+! Now call color_datekey on an overlay plot.  USE /OVER /KEY and /SET
+!
+!  SHADE/NOLAB/OVER/KEY/SET my_time
+!    GO color_datekey "h" my_time
+! PPL SHADE/OVER
+
+DEFINE SYMBOL DKhoriz_key = ($1"0|H>1|h>1|*>0")
+
+IF ($DKhoriz_key) THEN 
+
+   ppl ylab
+   ppl xlab
+   let DKx1 = `($ppl$xorg)+0.5`
+   let DKx2 = `($ppl$xorg)+($ppl$xlen)-0.5`
+   let DKy1 = `($ppl$yorg)+($ppl$ylen)+0.06`
+   let DKy2 = `DKy1+0.2`
+
+   ppl shakey ,0,0.0000001,100,,,`DKx1`,`DKx2`,`DKy1`,`DKy2`
+
+ELSE
+   ppl shakey ,,0.0000001
+
+ENDIF
+
+! define a time axis to use based on the time data in argument 2
+! with fewer points, and with a larger range if the range is quite short.
+
+
+DEFINE SYMBOL DKshape = `($2),RETURN=shape`
+
+IF `STRLEN ("($DKshape)") GT 1` THEN
+     LET/LIKE=($2) DKtime_1d = TSEQUENCE(($2))
+     DEFINE SYMBOL DKindx = L
+ELSE
+     DEFINE SYMBOL DKindx = ($DKshape"0|POINT>0|X>i|Z>k|T>l|E>m|*>0")
+     LET/LIKE=($2) DKtime_1d = ($2)
+ENDIF
+let DKunits_string = "`DKtime_1d.units`"
+
+IF `STRLEN ("($DKshape)") GT 1 AND STRINDEX(DKunits_string,"since") EQ 0` THEN
+   SAY 
+   SAY color_datekey.jnl : error in argument 2
+   SAY The units string for the time variable must include the time origin, e.g. "days since 1-jan-2000"
+   SAY
+   EXIT/SCRIPT
+ENDIF
+
+
+IF ($DKindx"0|0|*>1") THEN
+   let DKt1 = DKtime_1d[($DKindx)=@MIN]
+   let DKt2 = DKtime_1d[($DKindx)=@MAX]
+   IF ($DKindx"|m>0|*>1") THEN
+      let DKtmin = `DKt1[e=@min]`
+      let DKtmax = `DKt2[e=@max]`
+   ELSE
+     let DKtmin = `DKt1`
+     let DKtmax = `DKt2`
+   ENDIF
+ELSE
+
+! single point in time
+   let DKtmin = DKtime_1d
+   let DKtmax = DKt1
+ENDIF
+
+! Adjust if start and end times are too close together
+let DKoneday = 1
+
+let DKsince_loc = STRINDEX(DKunits_string,"since") - 2
+IF `DKsince_loc GT 1` THEN 
+   LET DKtunits = SUBSTRING(DKunits_string,1,`DKsince_loc`)
+   DEFINE SYMBOL DKtunits = `DKtunits`
+ENDIF
+let DKtime_units = "($DKtunits)"
+
+IF `STRINDEX(DKtime_units, "sec") GT 0` THEN let DKoneday = 24*60*60
+IF `STRINDEX(DKtime_units, "min") GT 0` THEN let DKoneday = 24*60
+IF `STRINDEX(DKtime_units, "ho") GT 0` THEN let DKoneday = 24
+IF `STRINDEX(DKtime_units, "da") GT 0` THEN let DKoneday = 1
+
+let DKdel = `(DKtmax-DKtmin)/DKoneday`
+
+!IF `DKdel LT 1` THEN
+!   IF `DKtmin GT 0` THEN 
+!      let DKtmin = `DKtmin - DKoneday`
+!      let DKtmax = `DKtmax + DKoneday`
+!   ELSE
+!      let DKtmin = `DKtmin + DKoneday`
+!      let DKtmax = `DKtmax - DKoneday`
+!   ENDIF   
+!ENDIF
+
+! Get time origin
+
+LET DKattnames = DKtime_1d.attnames
+IF `IS_ELEMENT_OF_STR_N (DKattnames, "time_origin") GT 0` THEN
+   DEFINE SYMBOL DKtime_0 = `DKtime_1d.time_origin`
+ELSE
+   IF `DKsince_loc GT 1` THEN  DEFINE SYMBOL DKtime_0 = `SUBSTRING (DKunits_string, DKsince_loc+8, STRLEN(DKunits_string))`
+ENDIF
+
+DEFINE AXIS/T=`DKtmin`:`DKtmax`:1/T0="($DKtime_0)"/units=($DKtunits) taxis 
+LET DKttvar = t[gt=taxis]
+let DKnt = `DKttvar,RETURN=lsize`
+
+! If the units are seconds since, we don't need that much resolution for this. Make it hours.
+
+IF `($DKtunits"0|seconds>1|*>0") AND DKnt GT 100*3600` THEN \
+DEFINE AXIS/T=`DKtmin`:`DKtmax`:3600/T0="($DKtime_0)"/units=($DKtunits) taxis 
+
+! Keep the axis from being super dense.
+if `DKnt gt 2000` THEN \
+DEFINE AXIS/T=`DKtmin`:`DKtmax`/NPOINTS=2000/T0="($DKtime_0)"/units=($DKtunits) taxis 
+
+! finished defining the time axis
+
+LET DKtpts = t[gt=taxis]
+LET/QUIET DKlabel = $3"0|hr>1|min>2|sec>3|*>0"
+
+let DKtlab_tstart = `DKtpts[L=@min]`
+DEFINE SYMBOL DKTLAB_tstart = `DKTLAB_tstart`
+
+let DKTLAB_tend = `DKtpts[L=@max]`
+DEFINE SYMBOL DKTLAB_tend = `DKTLAB_tend`
+
+let DKTLAB_tstep = INT((`DKTLAB_tend`-`DKTLAB_tstart`)/4)
+DEFINE SYMBOL DKTLAB_tstep = `DKTLAB_tstep`
+
+let DKdates_same = 0
+
+let DKttime = `($DKTLAB_tstart)+0*($DKTLAB_tstep)`
+  
+DEFINE symbol DKday_0_fourth = `TAX_DATESTRING(DKttime, DKtpts, "day")`
+
+let DKttime = `($DKTLAB_tstart)+1*($DKTLAB_tstep)`
+DEFINE symbol DKday_1_fourth = `TAX_DATESTRING(DKttime, DKtpts, "day")`
+IF `STRCMP("($DKday_1_fourth)", "($DKday_0_fourth)") EQ 0` THEN let DKdates_same = 1
+
+let DKttime = `($DKTLAB_tstart)+2*($DKTLAB_tstep)`
+let DKttime_last = `DKttime`
+DEFINE symbol DKday_2_fourth = `TAX_DATESTRING(DKttime, DKtpts, "day")`
+IF `STRCMP("($DKday_2_fourth)", "($DKday_1_fourth)") EQ 0` THEN let DKdates_same = 1
+
+let DKttime = `($DKTLAB_tstart)+3*($DKTLAB_tstep)`
+let DKttime_last = `DKttime`
+DEFINE symbol DKday_3_fourth = `TAX_DATESTRING(DKttime, DKtpts, "day")`
+IF `STRCMP("($DKday_3_fourth)", "($DKday_2_fourth)") EQ 0` THEN let DKdates_same = 1
+
+! The last section may be degenerate depending on the 
+! underlying time axis. Force it not to be, within
+! single-precision time coordinates
+
+let DKttime = `($DKTLAB_tstart)+4*($DKTLAB_tstep)`
+IF `DKttime LE DKttime_last` THEN 
+   let DKttime = `(1. - 1.e-5)* ($DKTLAB_tend) - 1`
+ENDIF 
+DEFINE symbol DKday_4_fourth = `TAX_DATESTRING(DKttime, DKtpts, "day")`
+IF `STRCMP("($DKday_4_fourth)", "($DKday_3_fourth)") EQ 0` THEN let DKdates_same = 1
+
+! --------
+! If some of the date symbols were repeated, add hours:minutes on a
+! second line under the lables.
+
+IF `DKdates_same GT 0` THEN
+   IF `DKlabel LT 2` THEN let DKlabel = 2
+
+   let DKttime = `($DKTLAB_tstart)+0*($DKTLAB_tstep)`
+   IF `DKlabel GT 0` THEN
+      GO pdatekey_dms
+      DEFINE symbol DKday_0_fourth = ($DKday_0_fourth)($DKdms)
+   ENDIF
+   
+   let DKttime = `($DKTLAB_tstart)+1*($DKTLAB_tstep)`
+   IF `DKlabel GT 0` THEN
+      GO pdatekey_dms
+      DEFINE symbol DKday_1_fourth = ($DKday_1_fourth)($DKdms)
+   ENDIF
+   
+   let DKttime = `($DKTLAB_tstart)+2*($DKTLAB_tstep)`
+   IF `DKlabel GT 0` THEN
+      GO pdatekey_dms
+      DEFINE symbol DKday_2_fourth = ($DKday_2_fourth)($DKdms)
+   ENDIF
+   
+   let DKttime = `($DKTLAB_tstart)+3*($DKTLAB_tstep)`
+   IF `DKlabel GT 0` THEN
+      GO pdatekey_dms
+      DEFINE symbol DKday_3_fourth = ($DKday_3_fourth)($DKdms)
+   ENDIF
+   
+   ! The last section may be degenerate depending on the 
+   ! underlying time axis. Force it not to be, within
+   ! single-precision time coordinates
+   
+   let DKttime = `($DKTLAB_tstart)+4*($DKTLAB_tstep)`
+
+   IF `DKttime LE DKttime_last` THEN 
+      let DKttime = `(1. - 1.e-5)* ($DKTLAB_tend) - 1`
+   ENDIF 
+   IF `DKlabel GT 0` THEN
+      GO pdatekey_dms
+      DEFINE symbol DKday_4_fourth = ($DKday_4_fourth)($DKdms)
+   ENDIF
+
+ENDIF
+
+DEFINE SYMBOL DKdatesize = 0.09
+IF `DKdates_same GT 0` THEN  DEFINE SYMBOL DKdatesize = 0.07
+
+! --------
+IF ($DKhoriz_key"0|0|*>1") THEN
+
+let DKvht = (($ppl$ylen) + ($ppl$yorg)) * 1.15
+IF ($vp_height"0|*>1") THEN let DKvht = ($vp_height)
+
+let DKrem = DKvht - (($ppl$ylen) + ($ppl$yorg))
+let DKymaxx = 0.22*($ppl$ylen)
+let DKkey_hi = MIN (`($ppl$yorg) + ($ppl$ylen) + DKymaxx`,`DKvht-0.051*DKrem`)
+
+let DKkey_lo = (($ppl$yorg) + ($ppl$ylen) + 0.22*MIN (DKrem,DKymaxx))
+let DKkey_lo = (($ppl$ylen) + 0.22*MIN (DKrem,DKymaxx))
+let DKkey_inc = `0.1 * (DKkey_hi - DKkey_lo) + 0.05`
+
+let DKkey_hi = `DKkey_lo + 4.0*DKkey_inc`
+let DKkey_hi = `DKkey_lo + 2.0*DKkey_inc`
+let DKkey_hi = `DKkey_lo + 0.7*DKkey_inc`
+
+let DKkeylen = `DKx2-DKx1`
+let DKkey_del = DKkeylen/4
+let DKkeystart = DKx1 - ($ppl$xorg)
+
+let DKbarline = "l"
+IF ($program_name"0|PyFerret>1|*>0") THEN let DKbarline = "|"
+
+let DKybar = `DKkey_lo+.2*DKkey_inc`
+
+LABEL/NOUSER `DKkey_del*0+DKkeystart`,`DKkey_hi`,0,0,($DKdatesize),($DKday_0_fourth)
+LABEL/NOUSER `DKkey_del*0+DKkeystart`,`DKybar`,0,0,.17,`DKbarline`
+
+LABEL/NOUSER `DKkey_del*1+DKkeystart`,`DKkey_hi`,0,0,($DKdatesize),($DKday_1_fourth)
+LABEL/NOUSER `DKkey_del*1+DKkeystart`,`DKybar`,0,0,.17,`DKbarline`
+
+LABEL/NOUSER `DKkey_del*2+DKkeystart`,`DKkey_hi`,0,0,($DKdatesize),($DKday_2_fourth)
+LABEL/NOUSER `DKkey_del*2+DKkeystart`,`DKybar`,0,0,.17,`DKbarline`
+
+LABEL/NOUSER `DKkey_del*3+DKkeystart`,`DKkey_hi`,0,0,($DKdatesize),($DKday_3_fourth)
+LABEL/NOUSER `DKkey_del*3+DKkeystart`,`DKybar`,0,0,.17,`DKbarline`
+
+LABEL/NOUSER `DKkey_del*4+DKkeystart`,`DKkey_hi`,0,0,($DKdatesize),($DKday_4_fourth)
+LABEL/NOUSER `DKkey_del*4+DKkeystart`,`DKybar`,0,0,.17,`DKbarline`
+
+ELSE ! vertical key
+
+   
+! Based on what key.F does to define the upper x corner of the colorbar key.
+! If we are in a viewport, start with vp_width
+! 10/2011 change size of labels to 0.1
+
+let DKvwid = (($ppl$xlen) + ($ppl$xorg)) * 1.15
+IF ($vp_width"0|*>1") THEN let DKvwid = ($vp_width)
+
+let DKrem = DKvwid - (($ppl$xlen) + ($ppl$xorg))
+let DKxmax = 0.25*($ppl$xlen)
+let DKkey_hi = MIN (`($ppl$xorg) + ($ppl$xlen) + DKxmax`,`DKvwid-0.051*DKrem`)
+
+let DKkey_lo = (($ppl$xorg) + ($ppl$xlen) + 0.25*MIN (DKrem,DKxmax))
+let DKkey_lo = (($ppl$xlen) + 0.25*MIN (DKrem,DKxmax))
+let DKkey_inc = `0.1 * (DKkey_hi - DKkey_lo)`
+
+let DKkey_hi = `DKkey_lo + 4.0*DKkey_inc`
+let DKkey_hi = `DKkey_lo + 2.0*DKkey_inc`
+
+LABEL/NOUSER `DKkey_hi`,`(($ppl$ylen)*0)/4-.05`,-1,0,($DKdatesize),($DKday_0_fourth)
+LABEL/NOUSER `DKkey_hi`,`(($ppl$ylen)*1)/4-.05`,-1,0,($DKdatesize),($DKday_1_fourth)
+LABEL/NOUSER `DKkey_hi`,`(($ppl$ylen)*2)/4-.05`,-1,0,($DKdatesize),($DKday_2_fourth)
+LABEL/NOUSER `DKkey_hi`,`(($ppl$ylen)*3)/4-.05`,-1,0,($DKdatesize),($DKday_3_fourth)
+LABEL/NOUSER `DKkey_hi`,`(($ppl$ylen)*4)/4-.05`,-1,0,($DKdatesize),($DKday_4_fourth)
+
+ENDIF
+
+! Clean up
+
+cancel var cb*
+cancel symbol cb*
+
+! End of file ------------ color_datekey.jnl--------------------------
+
+set mode/last verify
+
+

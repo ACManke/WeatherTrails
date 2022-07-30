@@ -1,0 +1,102 @@
+\cancel mode verify
+! color_by_over.jnl
+!
+! This script to make color ribbon plots of altitude, etc, overlaying an existing track plot.
+!
+! Argument 1 is file name - Latitude, Longitude extracted from a tcx file, including (relative) path
+! Argument 2 is altitude or sequence
+! Argument 3 color palette
+! Argument 4 optional other qualifiers, e.g. /level=
+
+!  Example: Plot a track that went to the property corners, overlay another track.
+!	go color_by data/2021-12-17T14_18_50_property_corners.dat Corners altitude 1 
+!	go color_by_over.jnl data/2022-04-01_lower_meadow_south_boundary.dat sequence black
+
+cancel data/all
+cancel mode logo
+
+define symbol fname = ($1%data/2021-12-12T15_35_07-08_00_PT33M14.lindalane.dat%)
+
+file/form=delim/skip=5/var="dist,time,lat,lon,ht"/type="num,edatime,num,num,num" ($fname)
+
+define symbol var = ($2"filled_altitude|altitude>filled_altitude|time>pactime|sequence>sequence")
+
+define symbol palette = ($3"blue_dark")
+
+
+if ($4"0|*>1") then 
+  define symbol qualifiers = ($4)
+endif
+
+IF ($var"|pactime>1|*>0") THEN define view/x=0:0.8/y=0:1 xyview
+
+!  Give variables units and titles
+
+! Time is 7 hours from UTC, or 8 in Daylight Savings Time
+! Convert to seconds; else color_datekey.jnl doesn't work well.  color_datekey needs fixing!
+
+let/units="days since 1-jan-1900"/title="Pacific Time" pacday = time - 7/24
+let/units="seconds since 1-jan-1900"/title="Pacific Time" pactime = (pacday)* 24* 3600
+
+! can plot things as a function of time. Good sanity check on the data
+
+define axis/t/t0=1-jan-1900/units=seconds pac_taxis = pactime
+let tt = t[gt=pac_taxis]
+
+! Convert Altitude to feet
+let/units=feet/title=Altitude altitude= reshape(ht* 3.28084, tt)
+
+! Convert Distance to feet
+let/units=feet/title="Distance along path" distance = reshape(dist* 3.28084, tt)
+
+let/title=Longitude longitude = reshape(lon + 360, tt)
+let/title=Latitude latitude = reshape(lat,tt)
+
+! Set up the map region with a bit of cushion around the edges
+! Set the aspect ratio for the window.
+
+let xmin = longitude[L=@min] 
+let xmax = longitude[L=@max]
+let  ymin = latitude[L=@min]
+let ymax = latitude[L=@max] 
+
+let aspect = MAX(0.4, (ymax- ymin)/(xmax - xmin))
+
+
+let xdel = 0.05*(xmax - xmin)
+let ydel = (0.1/aspect)* (ymax- ymin)
+
+
+! Plot altitude or sequence number
+
+! Altitude jumps around a lot! 
+!  Mask out the big jumps, then fill in the result
+
+let mask = if abs(altitude[t=@ddf]) le 3 and abs(altitude[t=@ddb]) le 3 then 1
+let/like=altitude masked_altitude = mask* altitude
+let/like=altitude/title="Altitude (masked and filled)" filled_altitude = masked_altitude[t=@fln]
+
+let/title="sequence number" sequence = L[gt=pac_taxis]
+
+IF ($var"|pactime>1|*>0") THEN 
+   ribbon/vs/line/thick=2/pal=($palette)($qualifiers)/set/nokey/hlim=`xmin-xdel`:`xmax+xdel`/vlim=`ymin-ydel`:`ymax+ydel`   longitude, latitude, ($var)
+      ppl xfor (f7.3)
+      ppl yfor (f6.3)
+      go unlabel ($labnum_t) 
+   ppl ribbon
+
+   
+   ribbon/over/vs/line/thick=2/pal=($palette)($qualifiers)/key/nolab/set  longitude, latitude, ($var)
+      go color_datekey "V" ($var)
+   ppl ribbon/over
+
+ELSE
+
+   ribbon/over/vs/line/thick=2/pal=($palette)($qualifiers)/set/hlim=`xmin-xdel`:`xmax+xdel`/vlim=`ymin-ydel`:`ymax+ydel`   longitude, latitude, ($var)
+      ppl xfor (f7.3)
+      ppl yfor (f6.3)
+      go unlabel ($labnum_t) 
+   ppl ribbon/over
+
+
+ENDIF

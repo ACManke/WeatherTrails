@@ -1,0 +1,8 @@
+
+set mode verify
+!  reference dataset, property corners
+ go color_by data/2022-04-13_property_corners.csv Corners sequence 1 gray_light /nokey
+
+! Overlay a track using color and draw color key
+ go color_by_over.jnl data/2022-06-30T15_55_07.522-07_00_PT1H13M36.822S_Hiking.csv sequence rnb /key
+

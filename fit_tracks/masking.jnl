@@ -1,0 +1,15 @@
+ ! NOAA/PMEL TMAP
+ ! PyFerret v7.63 (optimized)
+ ! Linux 4.4.0-19041-Microsoft - 11/11/21
+ ! 15-Dec-21 21:14     
+
+set mode verify
+go color_by_ht.jnl
+set win/new/asp=0.7/siz=2
+plot ht
+
+set win/new/asp=0.7/siz=2
+let mask = if abs(altitude[t=@ddf]) le 3 and abs(altitude[t=@ddb]) le 3 then 1
+let/like=altitude masked_altitude = mask* altitude
+let/like=altitude filled_altitude = masked_altitude[t=@fln]
+plot/color=blue/thick filled_altitude

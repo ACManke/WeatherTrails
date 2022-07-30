@@ -1,0 +1,162 @@
+\cancel mode verify
+!
+! color_by.jnl
+! This script to make color ribbon plots of altitude, etc.
+!
+!  "trackline" plot colored by altitude or sequence number
+! tcx file from an extraction of activity data from Fit app
+! Google Takeout:  enter deselect all, then find and select Fit. Hit "All Fit Data Included" which
+! opens a menu. Select Activities, which will download the runs and walks that Fit has recognized
+! as an activity. Download the zip file and unzip it. The tcx files are xml. Copy to fit_tracks/data
+!
+!
+! Tool to convert xml to csv: https://data.page/xml/csv, save the file.
+! Import this into Google Sheets (Drive, New, File Upload; choose the file then Open With Sheets)
+! Get rid of extra columns and rows, and Download as a csv.  Edit to add a header of 5 lines, 
+! change the T in date/time to space, remove the Z. Check for lines at the end.
+!
+! Or, using the editor...
+!    Copy tcx file to a file named with .dat, e.g. 2021-12-12T15_35_07-08_00_PT33M14.lindalane.dat
+!    Remove the initial tags before the first <Trackpoint>, looking for the first trackpoint which includes 
+!    altitude. Use the editor to remove the tags, replacing them with commas. Within date/times, replace 
+!    the T with spaces and Z with nothing. Remove the extra tags at the bottom of the file, bringing the 
+!    total distance and time span to the header lines if desired. Base the 5-line header on header.dat
+!
+! Script:
+! Argument 1 is file name - Latitude, Longitude extracted from a tcx file, including (relative) path
+! Argument 2 is a title for the top of the plot
+! Argument 3 is altitude, sequence or time (default altitude)
+! Argument 4 turns off or on  a gray rectangle outlining the data range 
+!                1= draw rectangle, 0= do not (default 0)
+! Argument 5 specify the color palette (default rnb)
+! Argument 6 optional other qualifiers, e.g. /level=
+
+cancel data/all
+cancel mode logo
+cancel viewport
+
+cancel symbol vp*
+
+define symbol fname = ($1%data/2021-12-12T15_35_07-08_00_PT33M14.lindalane.dat%)
+
+file/form=delim/skip=5/var="dist,time,lat,lon,ht"/type="num,edatime,num,num,num" ($fname)
+
+! Optional dataset title for the top of the plot
+if ($2"0|*>1") then 
+  set data/title="($2)"  1
+endif
+
+define symbol var = ($3"filled_altitude|pactime|sequence|altitude>filled_altitude|time>pactime")
+
+define symbol palette = ($var"|filled_altitude>rnb2|sequence>rnb2|pactime>rnb2")
+
+let rectangle = ($4"0|1|*>0")
+
+if ($5"0|*>1") then 
+  define symbol palette =($5)
+endif
+
+if ($6"0|*>1") then 
+  define symbol qualifiers = ($6)
+endif
+
+IF ($var"|pactime>1|*>0") THEN define view/x=0:0.8/y=0:1 xyview
+
+!  Give variables units and titles
+
+! Time is 7 hours from UTC, or 8 in Daylight Savings Time
+! Convert to seconds; else color_datekey.jnl doesn't work well.  color_datekey needs fixing!
+
+let/units="days since 1-jan-1900"/title="Pacific Time" pacday = time - 7/24
+let/units="seconds since 1-jan-1900"/title="Pacific Time" pactime = (pacday)* 24* 3600
+
+! can plot things as a function of time. Good sanity check on the data
+
+define axis/t/t0=1-jan-1900/units=seconds pac_taxis = pactime
+let tt = t[gt=pac_taxis]
+
+! Convert Altitude to feet
+let/units=feet/title=Altitude altitude= reshape(ht* 3.28084, tt)
+
+! Convert Distance to feet
+let/units=feet/title="Distance along path" distance = reshape(dist* 3.28084, tt)
+
+let/title=Longitude longitude = reshape(lon + 360, tt)
+let/title=Latitude latitude = reshape(lat,tt)
+
+! Set up the map region with a bit of cushion around the edges
+! Set the aspect ratio for the window.
+
+let lonmin = `longitude[L=@min]`
+let lonmax = `longitude[L=@max]`
+let latmin = `latitude[L=@min]`
+let latmax = `latitude[L=@max]`
+
+let aspect = MAX(0.4, (latmax- latmin)/(lonmax - lonmin))
+
+set window/aspect=`aspect`/siz=2
+IF ($var"|pactime>1|*>0") THEN set view xyview
+
+let xdel = 0.05*(lonmax - lonmin)
+let ydel = (0.1/aspect)* (latmax- latmin)
+
+! Plot altitude or sequence number
+
+! Altitude jumps around a lot! 
+!  Mask out the big jumps, then fill in the result
+
+let mask = if abs(altitude[t=@ddf]) le 3 and abs(altitude[t=@ddb]) le 3 then 1
+let/like=altitude masked_altitude = mask* altitude
+let/like=altitude/title="Altitude (masked and filled)" filled_altitude = masked_altitude[t=@fln]
+
+let/title="sequence number" sequence = L[gt=pac_taxis]
+
+IF ($var"|pactime>1|*>0") THEN 
+   ribbon/vs/line/thick=3/pal=($palette)($qualifiers)/set/nokey/hlim=`lonmin-xdel`:`lonmax+xdel`/vlim=`latmin-ydel`:`latmax+ydel`   longitude, latitude, ($var)
+      ppl xfor (f7.3)
+      ppl yfor (f7.4)
+      go unlabel ($labnum_t) 
+   ppl ribbon
+
+   
+   ribbon/over/vs/line/thick=3/pal=($palette)($qualifiers)/key/nolab/set  longitude, latitude, ($var)
+      go color_datekey "V" ($var)
+   ppl ribbon/over
+
+ELSE
+
+   ribbon/vs/line/thick=3/pal=($palette)($qualifiers)/set/hlim=`lonmin-xdel`:`lonmax+xdel`/vlim=`latmin-ydel`:`latmax+ydel`   longitude, latitude, ($var)
+      ppl xfor (f7.3)
+      ppl yfor (f7.4)
+      go unlabel ($labnum_t) 
+   ppl ribbon
+
+
+ENDIF
+
+! Gray rectangle around the outer limits of the data represented
+
+IF `rectangle GT 0` THEN
+  let xpts = { `lonmin,p=12`,  `lonmax,p=12`, `lonmax,p=12`,  `lonmin,p=12`,  `lonmin,p=12`}
+  let ypts = { `latmin,p=12`, `latmin,p=12`, `latmax,p=12`, `latmax,p=12`, `latmin,p=12`}
+  plot/vs/over/nolab/line/color=(50,50,50) xpts, ypts
+
+  plot/vs/over/nolab/line/sym=boxfill/color=(50,50,50) xpts, ypts
+endif
+
+!c ! If it's the property corners try these values from clicking on Google Maps
+!c !  northeast corner at 47.949581754131, -122.3663754314654
+!c !  southeast corner at 47.94867557541643, -122.3663754314654
+!c ! Emerald way at -122.37175787779526  so 
+!c !  northwest corner at 47.949581754131, -122.37175787779526 
+!c !  southwest corner at 47.94867557541643, -122.37175787779526 
+!c 
+!c    
+!c let lonmin = 360 + (-122.37175787779526  )
+!c let lonmax = 360 + (-122.3663754314654  )
+!c let latmin = 47.94867557541643
+!c let latmax = 47.949581754131
+!c 
+!c plot/vs/over/nolab/line/sym=boxfill/color=(50,50,50) xpts, ypts
+
+

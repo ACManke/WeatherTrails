@@ -1,0 +1,12 @@
+ ! NOAA/PMEL TMAP
+ ! PyFerret v7.65 (optimized)
+ ! Linux 4.4.0-22000-Microsoft - 12/29/21
+ ! 12-Mar-22 16:24     
+
+set mode verify
+go color_by   data/2022-03-05T16_25_Walking.dat
+sp more *4~
+go color_by   data/2022-03-05T16_25_Walking.dat
+sp more *4~
+set win/new; go color_by   data/2021-12-17T14_18_50_property_corners.dat Corners altitude 1; pause; go color_by_over  data/2022-03-05T16_25_Walking.dat altitude bluescale
+q

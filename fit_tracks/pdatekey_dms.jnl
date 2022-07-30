@@ -1,0 +1,23 @@
+! pdatekey_dms
+! Add some or all of day:min:sec
+! to the labels in the date key according to the value of DKlabel
+! This routine is called by both polymark_datekey and color_datekey
+! 3/2022 change the variable-naming prefix to DK for DateKey
+!
+! DKlabel     add
+!  1          :hh
+!  2          :hh:mm
+!  3          :hh:mm:sss
+
+let DKdayfrac = `TAX_DAYFRAC(DKttime, DKtpts)`
+DEFINE SYMBOL DKhou = `INT(DKdayfrac*24)`
+DEFINE SYMBOL DKmin = `INT( (DKdayfrac*24 - ($DKhou))* 60)`
+DEFINE SYMBOL DKsec = `INT( ( (DKdayfrac*24 - ($DKhou)) *60 - ($DKmin)) *60)`
+
+IF `STRLEN("($DKhou)") EQ 1` THEN DEFINE SYMBOL DKhou = 0($DKhou)
+IF `STRLEN("($DKmin)") EQ 1` THEN DEFINE SYMBOL DKmin = 0($DKmin)
+IF `STRLEN("($DKsec)") EQ 1` THEN DEFINE SYMBOL DKsec = 0($DKsec)
+
+IF `DKlabel GT 0` THEN DEFINE SYMBOL dms = <NL>($DKhou)
+IF `DKlabel GT 1` THEN DEFINE SYMBOL dms = ($dms):($DKmin)
+IF `DKlabel GT 2` THEN DEFINE SYMBOL dms = ($dms):($DKsec)

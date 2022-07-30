@@ -1,0 +1,41 @@
+! In detail, set cruise track as a time series and plot on a map: 
+!  The key labels need more space on the right, so define 
+!  a viewport leaving amargin on the right
+!
+def view/x=0:0.8/y=0:1 xview
+set view xview
+!
+def axis/t=1-jan-1990:1-mar-1990:1/units=days timeax
+show axis timeax
+LET lpts = L[gt=timeax]
+LET xpts = 180 + 50*COS(2*3.14*lpts/60)
+LET ypts = 15 + 20*sin(2*3.14*lpts/60)
+LET taxvar = t[gt=timeax]
+!
+GO basemap x=120:250 Y=25s:65n 20
+GO polymark_datekey polygon/over/key  xpts,ypts,lpts,ex,0.5,taxvar
+
+pause
+def axis/t=1-jan-1990:5-jan-1990:1/units=hours timeax
+show axis timeax
+GO basemap x=120:250 Y=25s:65n 20
+GO polymark_datekey polygon/over/key  xpts,ypts,lpts,ex,0.5,taxvar
+
+pause
+
+def axis/t=1-jan-1990:3-jan-1990:40/units=minutes timeax
+show axis timeax
+GO basemap x=120:250 Y=25s:65n 20
+GO polymark_datekey polygon/over/key  xpts,ypts,lpts,ex,0.5,taxvar
+pause
+
+def axis/t="1-jan-1990:02:00":"1-jan-1990:03:30":1/units=minutes timeax
+show axis timeax
+GO basemap x=120:250 Y=25s:65n 20
+GO polymark_datekey polygon/over/key  xpts,ypts,lpts,ex,0.5,taxvar
+pause
+
+def axis/t=1-jan-1990:1-mar-2000:30/units=days timeax
+show axis timeax
+GO basemap x=120:250 Y=25s:65n 20
+GO polymark_datekey polygon/over/key  xpts,ypts,lpts,ex,0.5,taxvar

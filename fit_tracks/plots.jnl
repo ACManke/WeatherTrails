@@ -1,0 +1,35 @@
+
+! Community park paths
+cancel data/all
+go color_by data/2021-10-04T10_52_16_community_park.dat "Community Park" sequence 0 
+say `time,return=dset`
+pause
+ 
+! Linda Lane
+cancel data/all
+go color_by data/2021-12-12T15_35_07-08_00_PT33M14.lindalane.dat "Linda Lane" sequence 0
+say `time,return=dset`
+pause
+ 
+! Our property corners
+cancel data/all
+go color_by data/2021-12-17T14_18_50_property_corners.dat "Property Corners" sequence 1 
+say `time,return=dset`
+pause
+ 
+! Our property paths
+cancel data/all
+go color_by data/2021-12-20T13_43_05_lindalane.dat "Linda Lane" sequence 0
+say `time,return=dset`
+pause
+ 
+! Linda Lane
+cancel data/all
+go color_by data/2021-12-24T14_20_56_property_paths.dat "Property Paths" sequence 1
+say `time,return=dset`
+pause
+ 
+! Our property, plus excursion down steep little path
+cancel data/all
+go color_by data/2022-02-17T15_47_45_property_some_paths.dat "Some of Our Paths" sequence 0
+say `time,return=dset` 

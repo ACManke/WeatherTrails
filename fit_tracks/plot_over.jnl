@@ -1,0 +1,9 @@
+set mode verify
+go color_by data/2021-12-24T14_20_56_property_paths.dat "Property Paths" sequence 1
+go color_by_over data/2022-02-17T15_47_45_property_some_paths.dat sequence blue_light
+
+pause
+cancel view
+go color_by data/2021-12-17T14_18_50_property_corners.dat "Property Corners and Paths" sequence 1
+go color_by_over data/2021-12-24T14_20_56_property_paths.dat sequence blue_light
+

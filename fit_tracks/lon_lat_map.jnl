@@ -1,0 +1,40 @@
+cancel mode logo
+
+! Argument 1 is file name - Latitude, Longitude extracted from a tcx file
+! Argument 2 is a title for the top of the plot.
+!
+!   grep Degrees filename.tcx > filename.dat
+!   Then use editor to make this into a simple list of latitude, longitude with a 2-line header.
+!
+!  go lon_lat_map.jnl  2021-12-12T15_35_neighborhood_walk.dat "Neighborhood Walk Dec 12 2021"
+! 
+!  go lon_lat_map.jnl  2021-10-04T10_52.dat "Community Park run"
+
+
+can data/all
+cancel view
+
+file/skip=2/var="lat,lon"  ($1"2021-10-04T10_52.dat")
+let/title="Sequence Number" xx = x[g=lon]
+
+if ($2"0|*>1") then 
+  set data/title="($2)" 1
+endif
+
+let/title=Longitude longitude = lon + 360
+let/title=Latitude latitude = lat
+
+let xmin = longitude[i=@min] 
+let xmax = longitude[i=@max]
+let  ymin = latitude[i=@min]
+let ymax = latitude[i=@max] 
+
+set window/aspect=`(ymax-ymin)/(xmax-xmin)`/siz=2
+
+let xdel = (xmax - xmin)/4
+let ydel = (ymax- ymin)/4
+
+ribbon/set/vs/line/sym=boxfill/hlim=`xmin-xdel`:`xmax+xdel`/vlim=`ymin-ydel`:`ymax+ydel` longitude, latitude, xx
+ppl xfor (f7.3)
+ppl yfor (f6.3)
+ppl ribbon
