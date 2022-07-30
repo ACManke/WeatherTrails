@@ -1,0 +1,82 @@
+!  Rewrite files with monthly data 
+!  First, edit to remove all but 2 header lines and the lines at the end. 
+!  Replace M with 9999. Replace T with 9999 in the Rainfall data
+!  And replace tab with space (not necessary)
+
+! Data has columns that are year, Jan, Feb, ..., Dec, Avg temp or total rain 
+! Will save just the Jan - Dec columns to an intermediate file
+
+! Define a monthly axis starting in Jan 1945
+let start_year = 1945
+let nyears = 78
+let indices = l[l=1:`nyears*12`]
+let month = mod(indices-1,12)+1
+let year = start_year + int((indices-1)/12)
+define axis/units=days/t0=1-jan-1900/edgeS tmonth = DAYS1900(year,month,1)
+
+
+! Maximum temperature
+cancel data/all
+file/skip=2/var="v01,v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13,v14" seattle_max_temp.dat
+
+
+set list/prec=6
+list/x=70:75 v13; pause
+
+list/norow/nohead/format=(12f7.1)/clobber/file=temporary.dat v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13
+
+file/var=temp_max/columns=12 temporary.dat
+
+! define output variable, simple equal-monthly axis
+set var/bad=9999 temp_max
+let tt = t[gt=tmonth]
+
+let/units="Deg F"/title="Monthly Average Maximum Temperature" temp_hi = reshape(temp_max, tt)
+save/t=1-jan-1945:31-may-2022/clobber/file=seattle_monthly.nc temp_hi
+
+cancel data/all
+can var/all
+
+
+! Minimum temperature
+cancel data/all; file/skip=2/var="v01,v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13,v14" seattle_min_temp.dat
+
+
+set list/prec=6
+list/x=70:75 v13; pause
+
+list/norow/nohead/format=(12f7.1)/clobber/file=temporary.dat v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13
+
+file/var=temp_min/columns=12 temporary.dat
+
+! define output variable, simple equal-monthly axis
+set var/bad=9999 temp_min
+let tt = t[gt=tmonth]
+
+let/units="Deg F"/title="Monthly Average Minimum Temperature" temp_lo = reshape(temp_min, tt)
+save/t=1-jan-1945:31-may-2022/append/file=seattle_monthly.nc temp_lo
+
+cancel data/all
+can var/all
+
+! Precipitation
+cancel data/all; file/skip=2/var="v01,v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13,v14" seattle_precip.dat
+
+set list/prec=6
+list/x=70:75 v13; pause
+
+list/norow/nohead/format=(12f7.1)/clobber/file=temporary.dat v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13
+
+file/var=precip/columns=12 temporary.dat
+
+! define output variable, simple equal-monthly axis
+set var/bad=9999 precip
+let tt = t[gt=tmonth]
+
+let/units="Deg F"/title="Monthly Rainfall" rain = reshape(precip, tt)
+save/t=1-jan-1945:31-may-2022/append/file=seattle_monthly.nc rain
+
+cancel data/all
+can var/all
+
+sp rm temporary.dat

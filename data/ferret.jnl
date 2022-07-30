@@ -1,0 +1,9 @@
+ ! NOAA/PMEL TMAP
+ ! PyFerret v7.65 (debug)
+ ! Linux 4.4.0-22000-Microsoft - 05/23/22
+ !  7-Jun-22 19:54     
+
+set mode verify
+go make_climatology_seattle.jnl
+y
+q

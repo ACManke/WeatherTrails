@@ -1,0 +1,81 @@
+! fill_mrain_fillnths.jnl
+! The monthly data, especially the rainfall, has lots of missing values.
+! For good computation of annual means and climatology, fill with that month's 
+! data from the other location
+
+cancel mode verify
+
+
+message Add filled data variables to Seattle dataset
+set win/asp=0.5/siz=2
+can mode logo
+use everett_monthly.nc
+use seattle_monthly.nc
+
+
+define axis/edges/t=1-jan-1945:31-dec-2022:1/units=year yearax
+
+set data everett_monthly.nc
+let/like=rain rain_fill = if rain[d=everett_monthly] then rain[d=everett_monthly] else rain[d=seattle_monthly]
+list/t=1-jan-2000:1-jan-2005 rain, rain_fill
+pause
+
+plot/vlim=-0.5:10/color=lightblue/thick=3/step=connected/t=1-jan-2017:31-dec-2020 rain_fill
+plot/over/color=(50,50,50)/step=connected rain
+plot/over/color=red/step=connected rain[d=seattle_monthly]
+
+define attribute/output rain_fill.comment = "Missing data filled with Seattle values"
+save/append/file=everett_monthly.nc rain_fill
+
+
+let/like=temp_lo temp_lo_fill = if temp_lo[d=everett_monthly] then temp_lo[d=everett_monthly] else temp_lo[d=seattle_monthly]
+define attribute/output temp_lo_fill.comment = "Missing data filled with Seattle values"
+save/append/file=everett_monthly.nc temp_lo_fill
+
+
+let/like=temp_hi temp_hi_fill = if temp_hi[d=everett_monthly] then temp_hi[d=everett_monthly] else temp_hi[d=seattle_monthly]
+define attribute/output temp_hi_fill.comment = "Missing data filled with Seattle values"
+save/append/file=everett_monthly.nc temp_hi_fill
+
+message Now add filled data variables to Seattle dataset
+
+cancel var/all
+cancel memory
+
+use seattle_monthly.nc
+
+
+let/like=rain rain_fill = if rain[d=seattle_monthly] then rain[d=seattle_monthly] else rain[d=everett_monthly]
+
+plot/vlim=-0.5:10/color=lightblue/thick=3/step=connected/t=1-jan-2011:31-dec-2014 rain_fill
+plot/over/color=(50,50,50)/step=connected rain
+plot/over/color=red/step=connected rain[d=seattle_monthly]
+
+define attribute/output rain_fill.comment = "Missing data filled with Everett values"
+save/append/file=seattle_monthly.nc rain_fill
+
+
+let/like=temp_lo temp_lo_fill = if temp_lo[d=seattle_monthly] then temp_lo[d=seattle_monthly] else temp_lo[d=everett_monthly]
+define attribute/output temp_lo_fill.comment = "Missing data filled with Everett values"
+save/append/file=seattle_monthly.nc temp_lo_fill
+
+
+let/like=temp_hi temp_hi_fill = if temp_hi[d=seattle_monthly] then temp_hi[d=seattle_monthly] else temp_hi[d=everett_monthly]
+define attribute/output temp_hi_fill.comment = "Missing data filled with Everett values"
+save/append/file=seattle_monthly.nc temp_hi_fill
+
+
+cancel data/all
+cancel variable/all
+
+use everett_monthly 
+say Everett rain missing `rain[L=@nbd]`, rain_fill missing `rain_fill[L=@nbd]`
+say Everett temp_lo missing `temp_lo[L=@nbd]`, temp_lo_fill missing `temp_lo_fill[L=@nbd]`
+say Everett temp_hi missing `temp_hi[L=@nbd]`, temp_hi_fill missing `temp_hi_fill[L=@nbd]`
+
+
+pause
+use seattle_monthly 
+say Seattle rain missing `rain[L=@nbd]`, rain_fill missing `rain_fill[L=@nbd]`
+say Seattle temp_lo missing `temp_lo[L=@nbd]`, temp_lo_fill missing `temp_lo_fill[L=@nbd]`
+say Seattle temp_hi missing `temp_hi[L=@nbd]`, temp_hi_fill missing `temp_hi_fill[L=@nbd]`

@@ -1,0 +1,12 @@
+
+use everett_climatology.nc
+use seattle_climatology.nc
+
+list rain[d=1], rain[d=2], rain[d=1] - rain[d=2]
+list temp_lo[d=1], temp_lo[d=2], temp_lo[d=1] - temp_lo[d=2]
+list temp_hi[d=1], temp_hi[d=2], temp_hi[d=1] - temp_hi[d=2]
+
+
+list rain_1945_2021[d=1], rain_1945_2021[d=2], rain_1945_2021[d=1] - rain_1945_2021[d=2]
+list temp_lo_1945_2021[d=1], temp_lo_1945_2021[d=2], temp_lo_1945_2021[d=1] - temp_lo_1945_2021[d=2]
+list temp_hi_1945_2021[d=1], temp_hi_1945_2021[d=2], temp_hi_1945_2021[d=1] - temp_hi_1945_2021[d=2]
