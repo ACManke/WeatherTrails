@@ -56,7 +56,6 @@ TotalRain,RelativePressure,OutdoorHumidity,UVRadiationIndex,SolarRadiation,it_in
 OutdoorBattery,IndoorFeels Like,IndoorDewPoint"/form=delim data/($infile)
 
 show data; pause
-list/i=1:5 ot_in, it_in; pause
 ! Write date/time, Outdoor Temp, Dew Point, Feels Like, Indoor Temp, Hourly Rain, Event Rain, Daily Rain in increasing time order to a new csv file
 
 say/clobber/outfile="data/($monthyear)_dates_incr.dat" "($month) ($year) Dates Increasing: Date,Outdoor Temperature,Feels Like,Dew Point,Indoor Temperature, Hourly Rain, Daily Rain, RelativePressure, OutdoorHumidity"
@@ -147,7 +146,7 @@ let/units=Inch/title="Daily Rain" Daily_Rain = reshape(dr_in, tt)
 let/units=Hg/title="Relative Pressure" Relative_Pressure = reshape(pres_in, tt)
 let/units=Percent/title="Outdoor Humidity" Outdoor_Humidity = reshape(hum_in, tt)
 
-
+show data; pause
 save/clobber/outtype=float/file="data/($outfile)" Outdoor_Temperature, Feels_Like, Dew_Point, Indoor_Temperature, Hourly_Rain, Daily_Rain, Relative_Pressure, Outdoor_Humidity
 
 cancel var/all
