@@ -27,7 +27,10 @@
 ! Argument 2 is a title for the top of the plot
 ! Argument 3 is altitude, sequence or time (default altitude)
 ! Argument 4 turns off or on  a gray rectangle outlining the data range 
-!                1= draw rectangle, 0= do not (default 0)
+!		1= draw rectangle
+!		2= use the file property_corners.nc, corners from the file 
+!		   data/2021-12-17T14_18_50_property_corners.dat
+!		0= do not (default 0) 
 ! Argument 5 specify the color palette (default rnb)
 ! Argument 6 optional other qualifiers, e.g. /level=
 
@@ -50,7 +53,7 @@ define symbol var = ($3"filled_altitude|pactime|sequence|altitude>filled_altitud
 
 define symbol palette = ($var"|filled_altitude>rnb2|sequence>rnb2|pactime>rnb2")
 
-let rectangle = ($4"0|1|*>0")
+let rectangle = ($4"0|1|2|*>0")
 
 if ($5"0|*>1") then 
   define symbol palette =($5)
@@ -136,13 +139,16 @@ ENDIF
 
 ! Gray rectangle around the outer limits of the data represented
 
-IF `rectangle GT 0` THEN
+IF `rectangle EQ 1` THEN
   let xpts = { `lonmin,p=12`,  `lonmax,p=12`, `lonmax,p=12`,  `lonmin,p=12`,  `lonmin,p=12`}
   let ypts = { `latmin,p=12`, `latmin,p=12`, `latmax,p=12`, `latmax,p=12`, `latmin,p=12`}
   plot/vs/over/nolab/line/color=(50,50,50) xpts, ypts
 
   plot/vs/over/nolab/line/sym=boxfill/color=(50,50,50) xpts, ypts
-endif
+ELIF `rectangle EQ 2` THEN
+  use data/property_corners.nc
+  plot/vs/over/nolab/line/sym=boxfill/color=(50,50,50) xpts, ypts
+ENDIF
 
 !c ! If it's the property corners try these values from clicking on Google Maps
 !c !  northeast corner at 47.949581754131, -122.3663754314654
