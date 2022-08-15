@@ -28,7 +28,7 @@ IF ($1"0|0|1|2|*>1") THEN
    ENDIF
 
    !  Plot style for overlaying monthly reference data
-   define symbol graystyle = /nolab/step=connected/line/color=(70,70,70)/dash=(0.03,0.03,0.03,0.03)
+   define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.03,0.03,0.03,0.03)
 
 ENDIF
 
@@ -93,6 +93,8 @@ define symbol var_title = Daily Rain
 ! variable to plot
 let/like=day_rain var = day_rain[L=@SBX:5]
 
+let/like=day_rain var = day_rain[L=@SBX:5]  ! *****
+
 ! Plotting a subset of the year - a few months before the current date
 ! To set particular dates, set date1 and date2 below call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
@@ -102,6 +104,7 @@ DEFINE SYMBOL date2 = 31-Dec
 GO date_range
 GO color_labels ($date1) ($date2)
 define symbol plot_title = ($var_title), 5-day smoothed  <NL> ($color_label)
+define symbol plot_title = ($var_title)<NL> ($color_label)  ! *****
 
 let ax_lo = -0.01
 let dax_hi =  `INT(dax_hi + 0.5)`
@@ -109,7 +112,7 @@ define symbol plotstyle = ($plotstyle)/vlim=`ax_lo`:`dax_hi`
 
 ! Set the plot-style
 define symbol plotstyle=($plotstyle)/thick=2
-
+define symbol plotstyle=($plotstyle)/step=connected ! *****
 
 
 set view full
@@ -223,6 +226,7 @@ IF ($reference) THEN  ! overlay gray line for the reference data
 endif
 
 ! List monthly data
+
 IF ($reference) THEN
 
    let/like=rain[d=2] Reference = rain[d=2, gt=tmonth]
@@ -237,12 +241,11 @@ IF ($reference) THEN
    let/title="Yearly Accumulation"/like=month_rain rainsum = month_rain[t=($timerange)@rsum]
    let/title="($reference_name) Accumulation"/like=($reference_name) ($reference_name)sum = ($reference_name)[t=($timerange)@rsum]
 
-   define symbol list_quals = /nohead/prec=3/format=(a, f10.1, f10.1, f10.1, f10.1)/norow
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f10.1, f10.1, f12.1, f10.1)
 
    say
-   say Month      MonthRain YearAccum   ($reference_name)   ($reference_name)Accum
+   say Month      MonthRain YearAccum     ($reference_name)   ($reference_name)Accum
    say
-
 
    list($list_quals)/t=($timerange) modate, month_rain, rainsum, ($reference_name), ($reference_name)sum
    say
@@ -257,39 +260,16 @@ IF ($reference) THEN
    say;\
    let yr = `yr + 1`)
 
-!c   cancel data 2
-!c   use data/everett_climatology.nc
-!c   use data/seattle_climatology.nc
-!c
-!c   set data 1
-!c
-!c   let/like=rain[d=2] Paine = rain[d=2, gt=tmonth]
-!c   let/like=rain[d=3] Seattle = rain[d=3, gt=tmonth]
-!c
-!c! And draw a bar-chart showing month_rain
-!c
-!c   set win/new/siz=1/asp=0.5
-!c   let pr = rain[d=2,L=1:12] ! Paine
-!c!   plot/thick//step=conn/color=blue/vlim=`month_min`:`month_max`/title=" " pr
-!c
-!c!    go bar_chart3 poly/axes/over/nolab/fill/line/color=(10,10,44)/pal=blue/lev=(0,10,1) pr, pr
-!c
-!c
-!c   let sr = rain[d=3,L=1:12]  ! Seattle
-!c   plot/over/nolab/step=conn/nolab/color=(30,100,0)/vlim=`month_min`:`month_max` sr
-!c
-!c!   go bar_chart3 poly/axes/over/nolab/fill/line/color=(0,55,0)/pal=green_light/lev=(0,10,1) sr, sr
-!c
-!c   annotate/norm/x=-0.06/ypos=0.5/valign=0/angle=90/siz=0.14 "Inch"
-!c   
-!c   annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.18 "Monthly Rain: Seattle (green) and Paine Field (blue)"
-!c   annotate/norm/x=0.5/y=-.3/halign=0/siz=0.18 "Yearly totals: Seattle `sr[L=@sum],p=4`  Paine Field `pr[L=@sum],p=4`"
-!c
-
 else
 
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f10.1, f10.1)
+
+   say
+   say Month      MonthRain YearAccum 
+   say
+
    let rainsum = month_rain[t=`TAX_DATESTRING(tin[L=1], tin, "day")`:31-dec-`firsty`@rsum]
-   list/prec=3/format=(a, f8.1, f8.1)/norow/t=`TAX_DATESTRING(tin[L=1], tin, "day")`:31-dec-`firsty` modate, month_rain, rainsum
+   list($list_quals)/t=`TAX_DATESTRING(tin[L=1], tin, "day")`:31-dec-`firsty` modate, month_rain, rainsum
    say
 
    let yr = firsty+1
@@ -297,11 +277,17 @@ else
    IF `yy LT ny` THEN define symbol timerange = 1-jan-`yr`:31-dec-`yr`;\
    IF `yy EQ ny` THEN define symbol timerange = 1-jan-`yr`:`TAX_DATESTRING(tin[L=@max], tin, "day")`;\
    let rainsum = month_rain[t=($timerange)@rsum];\
-   list/nohead/prec=3/format=(a, f8.1, f8.1)/norow/t=($timerange) modate, month_rain, rainsum;\
+   list($list_quals)/t=($timerange) modate, month_rain, rainsum;\
    say;\
    let yr = `yr + 1`)
 
+
+
    say To see Paine Field or Seattle average month_rain rainfall with these plots:
    say GO plot_rain 1      or   GO plot_rain 2
+
+let yr = firsty
+
+
 
 endif

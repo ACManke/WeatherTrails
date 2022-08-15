@@ -19,7 +19,7 @@ define symbol var_title = Daily ($trans_title) `($var),return=title`
 
 !  Plot style for overlaying monthly reference data
 if `($reference)` then\   
-   define symbol graystyle = /nolab/step=connected/line/color=(70,70,70)/dash=(0.03,0.03,0.03,0.03)
+   define symbol graystyle = /nolab/color=(50,50,50)/dash=(0.05,0.05,0.05,0.05)/step=connected
 
 
 ! ----------------------
@@ -27,7 +27,8 @@ if `($reference)` then\
 ! To set particular dates, set date1 and date2 below call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
 
-DEFINE SYMBOL smoothing = 5
+DEFINE SYMBOL smoothing = 1
+DEFINE SYMBOL yrm = 1
 
 DEFINE SYMBOL date1 = 01-Jan
 DEFINE SYMBOL date2 = 31-Dec
@@ -45,7 +46,8 @@ define symbol plotstyle=/thick=2
 
 go color_labels ($date1) ($date2)
 
-define symbol plot_title = ($var_title), ($smoothing)-day smoothed  <NL> ($color_label)
+define symbol plot_title = ($var_title)<NL> ($color_label)
+IF `($smoothing) GT 1` THEN define symbol plot_title = ($var_title), ($smoothing)-day smoothed  <NL> ($color_label)
 
 let dax_lo =  `INT(dax_lo - 1)`
 let dax_hi =  `INT(dax_hi + 1)`
@@ -61,6 +63,7 @@ plot($plotstyle)/color=($color1)($timerange)/title="($plot_title)"/set var
 go unlabel ($lab($labnum_year))
 ppl plot
 
+
 let yr = firsty+1
 
 repeat/range=2:`ny`/name=yy (\
@@ -75,13 +78,13 @@ repeat/range=2:`ny`/name=yy (\
 annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather Recent `($var),return=title` Data"
 
 
-message Plotting smoothed data for ($date1) to ($date2).  Edit draw_ambient_plots.jnl to change the date range
-
+say Plotting smoothed data for ($date1) to ($date2).  Edit draw_ambient_plots.jnl to change the date range or add smoothing
+pause
 
 cancel symbol yrm
 
 ! ---------------------- daily for entire year
-set win/new/aspect=0.5/size=2
+
 go color_labels 01-Jan 31-Dec
 
 ! What's the overall min/max?  Use for the v-limits 
@@ -148,7 +151,7 @@ let color = INT( (mm-1)/12) + 1
 
 let ax_add = 4
 define symbol units = `($var),return=units`
-IF `strindex(upcase("($units)"), "INCH") EQ 0` THEN let ax_add = 1
+IF `strindex(upcase("($units)"), "INCH") GT 0` THEN let ax_add = 1
 
 let ax_lo = INT(monthly[t=@min]) - ax_add
 let ax_hi = INT(monthly[t=@max]) + ax_add
@@ -243,18 +246,19 @@ repeat/range=2:`ny`/name=yy (\
 
 IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
 annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
+annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
 
 
 say ($plot_annotation)
-list/prec=3/t=`TAX_DATESTRING(TT[L=1], TT, "day")`:`TAX_DATESTRING(TT[L=@max], TT, "day")` monthly
-
 if `($reference)` then
+
+
 
    use ($reference_data)
    if ($trans"0|max>1|*>0") then 
-      plot/over/nolab/color=(70,70,70)/dash=(0.05,0.05,0.05,0.05)/step=connected temp_hi[gt=tmonth]
+      plot/over($graystyle) temp_hi[gt=tmonth]
    else
-      plot/over/nolab/color=(70,70,70)/dash=(0.05,0.05,0.05,0.05)/step=connected temp_lo[gt=tmonth]
+      plot/over($graystyle) temp_lo[gt=tmonth]
    endif
    cancel data ($reference_data)
 
@@ -268,7 +272,7 @@ endif
 set data 1
 
 
-! --------------
+! -------------- List monthly data --------------
 
 say "Monthly"
 let tm = t[gt=monthly]
@@ -289,21 +293,35 @@ IF ($reference) THEN
 
    set data 1
 
-   ! list monthly data, starting and ending with the Ambient data record
-   let tin = t[gt=($var)[d=1]]
-   
-   let/like=($hilo_var)[d=2] Everett = ($hilo_var)[d=2, gt=tmonth]
-   let/like=($hilo_var)[d=3] Seattle = ($hilo_var)[d=3, gt=tmonth]
-   define symbol listquals = /prec=3/format=(a, f8.1, f8.1, f8.1)/norow
+   let m1 = 1
+   let yr = firsty
+   cancel symbol comma
+   cancel symbol varlist
 
-   list($listquals)/t=`TAX_DATESTRING(tin[L=1], tin, "day")`:31-dec-`firsty` modate, monthly, Everett, Seattle
-   say
+   repeat/range=1:`ny`/name=yy (\
+   let/title="Ambient `yr`" A_`yr` = reshape(monthly[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)A_`yr`;\
+   define symbol comma = , ;\
+   let m1 = `m1+12`;\
+   let yr = `yr+1`)
 
-   let yr = firsty+1
-   repeat/range=2:`ny`/name=yy (\
-    IF `yy LT ny` THEN list/nohead($listquals)/t=1-jan-`yr`:31-dec-`yr` modate, monthly, Everett, Seattle;\
-    IF `yy EQ ny` THEN list/nohead($listquals)/t=1-jan-`yr`:`TAX_DATESTRING(tin[L=@max], tin, "day")` modate, monthly, Everett, Seattle;\
-    say;\
-    let yr = `yr + 1`)
+   let/like=($hilo_var)[d=2] Everett = ($hilo_var)[d=2]
+   let/like=($hilo_var)[d=3] Seattle = ($hilo_var)[d=3]
+   list ($varlist), Everett, Seattle
+
+else
+
+   let m1 = 1
+   let yr = firsty
+   cancel symbol comma
+   cancel symbol varlist
+
+   repeat/range=1:`ny`/name=yy (\
+   let/title=c`yr` c`yr` = reshape(monthly[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)c`yr`;\
+   define symbol comma = ,;\
+   let m1 = `m1+12`;\
+   let yr = `yr+1`)
+   list ($varlist)
 
 endif
