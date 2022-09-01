@@ -62,7 +62,6 @@ define view/x=0:1/y=0.5:1/text=1 upper($yy);\
 define view/x=0:1/y=0:0.5/text=1 lower($yy);\
 )
 
-
 ! Define colors to show each year in its own color
 
 go write_ambient_palette
@@ -98,17 +97,22 @@ let/like=day_rain var = day_rain[L=@SBX:5]  ! *****
 ! Plotting a subset of the year - a few months before the current date
 ! To set particular dates, set date1 and date2 below call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
+! color_labels also sets the dax_lo, dax_hi, min and max of data in this date range
 
 DEFINE SYMBOL date1 = 01-Jan
 DEFINE SYMBOL date2 = 31-Dec
 GO date_range
 GO color_labels ($date1) ($date2)
+
 define symbol plot_title = ($var_title), 5-day smoothed  <NL> ($color_label)
 define symbol plot_title = ($var_title)<NL> ($color_label)  ! *****
 
+! plot range for this subset of dates. Handle case of small amount of rainfall.
 let ax_lo = -0.01
-let dax_hi =  `INT(dax_hi + 0.5)`
-define symbol plotstyle = ($plotstyle)/vlim=`ax_lo`:`dax_hi`
+let ax_hi =  `INT(dax_hi + 0.5)`
+if `ax_hi eq 0` THEN let ax_hi =  `INT(10*dax_hi + 1)/10`
+
+define symbol plotstyle = ($plotstyle)/vlim=`ax_lo`:`ax_hi`
 
 ! Set the plot-style
 define symbol plotstyle=($plotstyle)/thick=2
@@ -151,7 +155,6 @@ LET indices = L[L=1:`ny*12 + 1`]
 LET month = MOD(indices-1,12)+1
 LET year = start_year + INT((indices-1)/12)
 DEFINE AXIS/UNITS=days/T0=1-jan-1900/EDGES tmonth = DAYS1900(year,month,1)
-
 
 say "Monthly Rain"
 set window/new/title="Monthly Rain"/size=2/aspect=1
