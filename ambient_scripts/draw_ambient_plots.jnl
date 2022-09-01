@@ -13,7 +13,7 @@ define symbol trans_title = ($trans"|max>High|min>Low")
 
 define axis/t=1-nov-`firsty-1`:1-jan-`lasty+1`:1/edges/units=days tday
 
-let/like=($var) day_var_($trans) = ($var)[gt=tday@($trans)]
+let/like=($var)/title="`($var),return=title` ($trans)" day_var_($trans) = ($var)[gt=tday@($trans)]
 
 define symbol var_title = Daily ($trans_title) `($var),return=title`
 
@@ -75,7 +75,7 @@ repeat/range=2:`ny`/name=yy (\
  let yr = `yr + 1`)
 
 
-annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather Recent `($var),return=title` Data"
+annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather `($var),return=title` Data, recent months"
 
 
 say Plotting smoothed data for ($date1) to ($date2).  Edit draw_ambient_plots.jnl to change the date range or add smoothing
@@ -137,7 +137,7 @@ cancel view
 set window/size=2/aspect=1
 
 
-define symbol plot_annotation = ($trans_title)est Daily `($var),return=title`, each month (Deg F)
+define symbol plot_annotation = ($trans_title)est Daily `($var),return=title` in month (Deg F)
 
 IF ($trans"max>1|*>0") THEN define symbol plot_annotation = Monthly Maximum High Temp (Deg F)
 IF ($trans"min>1|*>0") THEN define symbol plot_annotation = Monthly Minimum Low Temp (Deg F)
@@ -248,11 +248,11 @@ IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
 annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
 annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
 
+say " "
+say "($plot_annotation)"
+say " "
 
-say ($plot_annotation)
 if `($reference)` then
-
-
 
    use ($reference_data)
    if ($trans"0|max>1|*>0") then 
@@ -271,10 +271,10 @@ endif
 
 set data 1
 
+say " "
 
 ! -------------- List monthly data --------------
 
-say "Monthly"
 let tm = t[gt=monthly]
 let modate = TAX_DATESTRING(tm, tm, "month")
 
@@ -299,8 +299,8 @@ IF ($reference) THEN
    cancel symbol varlist
 
    repeat/range=1:`ny`/name=yy (\
-   let/title="Ambient `yr`" A_`yr` = reshape(monthly[L=`m1`:`m1+11`], t[gt=month_irreg]);\
-   define symbol varlist = ($varlist)($comma)A_`yr`;\
+   let/title="Ambient `yr`" c`yr` = reshape(monthly[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)c`yr`;\
    define symbol comma = , ;\
    let m1 = `m1+12`;\
    let yr = `yr+1`)
