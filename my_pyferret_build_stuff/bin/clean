@@ -1,0 +1,14 @@
+#!/bin/csh -f
+
+
+echo " "
+echo "Remove *.bak"
+rmlist "*.bak"
+
+echo " "
+echo "Remove *.out"
+rmlist "*.out"
+
+echo " "
+echo "Remove ferret.jnl.*"
+rmlist "ferret.jnl.*~"

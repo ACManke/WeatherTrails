@@ -1,0 +1,18 @@
+#!/bin/csh -f
+
+set flist = `ls $1`
+
+if (${#flist} == 0) then
+  exit
+endif
+
+foreach fname (`ls $1`)
+ls $fname
+end
+
+echo -n "remove ?"
+set ans = ($<)
+if ($ans == y) then 
+  rm -f $1
+endif
+
