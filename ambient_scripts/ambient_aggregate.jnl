@@ -8,7 +8,10 @@ let filelist = spawn("ls -1 data/ambient-weather-202*.nc")
 
 ! Define the aggregation - cancel first if it's already defined
 
-IF `outdoor_temperature,return=isready` THEN cancel data ambient
+IF `outdoor_temperature,return=isready` THEN 
+   define symbol dname = `outdoor_temperature,return=dset`
+   IF  ($dname"0|ambient>1|*>0") THEN cancel data ambient
+endif
 
 tseries ambient = filelist
 show data/brief
