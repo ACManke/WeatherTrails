@@ -10,7 +10,7 @@ foreach fname (`ls $1`)
 ls $fname
 end
 
-echo -n "remove ?"
+echo -n "remove all? "
 set ans = ($<)
 if ($ans == y) then 
   rm -f $1
