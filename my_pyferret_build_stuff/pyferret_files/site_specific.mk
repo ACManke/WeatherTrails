@@ -13,7 +13,7 @@ DIR_PREFIX = $(HOME)/git/myfork
 ## Using the "install" Makefile target creates a generic pyferret-*.tar.gz file
 ## and then extracts it to create a PyFerret installation at this location.
 ## =========================
-INSTALL_FER_DIR = $(HOME)/my_fork
+INSTALL_FER_DIR = $(HOME)/my_fork_pyferret
 
 ## =========================
 ## Machine type for which to build Ferret/PyFerret
