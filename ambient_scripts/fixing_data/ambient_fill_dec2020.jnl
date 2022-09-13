@@ -1,0 +1,77 @@
+cancel data/all
+cancel variable/all
+cancel symbol/all
+
+let modays = {31,28,31,30,31,30,31,31,30,31,30,31}
+
+set window/asp=0.5/siz=2
+define symbol fname = ambient-weather-20201201-20201231.nc
+use data/($fname)
+
+! define regularly spaced 5-minutes axis
+let tt = t[gt=taxis]
+define symbol moyr = `tax_datestring(tt[l=1], tt[l=1], "month")`
+let month = `tax_month(tt[l=1], tt[l=1])`
+let year = `tax_year(tt[l=1], tt[l=1])`
+let lastday = modays[i=`month`] 
+! data starts 2020 so no need to be fancy
+if `month eq 2 and (year/4 - int(year/4) eq 0)` then let lastday = lastday+1 
+
+define axis/t="1-($moyr):00:00":"`lastday`-($moyr):23:55":`5/1440,prec=12`/\
+ units="`outdoor_temperature,return=tunits`"/t0="`outdoor_temperature,return=t0`" regt
+show axis taxis
+show axis regt
+let tr = t[gt=regt]
+
+set var/name=ot_in outdoor_temperature
+let/like=ot_in outdoor_temperature = ot_in[gt=regt@xact]
+
+plot/color=red/thick=5 outdoor_temperature
+plot/over/color=black ot_in
+
+pause
+
+
+cancel var outdoor_temperature
+set var/name=outdoor_temperature ot_in
+
+let delt = tt[L=@shf:1] - tt
+plot delt  ! to get yaxis_max
+if `($yaxis_max) LT 0.04` then define symbol  yaxis_max = 0.05
+plot/vlim=0:($yaxis_max)/title="hour is 0.042" delt
+
+
+message see where the gap is, stop here and set the dates in the next lines to zoom in on the gap
+
+plot/t=27-($moyr):29-($moyr)/line/sym/color=blue outdoor_temperature
+list/t=27-($moyr):29-($moyr)/prec=9 outdoor_temperature, delt, if delt gt 0.05 then 1
+pause
+
+set mode verify
+let varnames = ..varnames
+let nvars = ..nvars
+
+! Write a new file. First all the data up to the start of the gap,
+! then missing-data values starting at the next time point through 
+! one timestep before the end of the gap, then the remaining data 
+! after the gap.
+
+sp rm ($fname)
+
+repeat/range=1:`nvars`/name=q (\
+def sym q = `q`;\
+def sym var = `varnames[i=($q)]`;\
+if ($var"0|taxis_bnds>1|*>0") then exit/cycle;\
+save/append/nobounds/file=($fname)/outtype=float/t="1-($moyr)":"27-($moyr):15:55:00" ($var);\
+set var/name=var_in ($var);\
+let/like=var_in ($var) = var_in[gt=regt@xact];\
+save/append/nobounds/file=($fname)/outtype=float/t="27-($moyr):16:00:00":"28-($moyr):10:05:00" ($var);\
+cancel variable ($var);\
+set var/name=($var) var_in;\
+save/append/nobounds/file=($fname)/outtype=float/t="28-($moyr):10:10:00":"`lastday`-($moyr) 23:55:00" ($var);\
+)
+
+cancel data/all
+use ($fname)
+
+plot/t=27-($moyr):29-($moyr)/line/sym/color=blue outdoor_temperature; pause

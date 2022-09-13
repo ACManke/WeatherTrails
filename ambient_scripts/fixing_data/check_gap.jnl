@@ -1,0 +1,15 @@
+
+can data/all
+use ($1)
+let tt = t[gt=taxis]
+
+let delt = tt[L=@shf:1] - tt
+plot delt
+if `($yaxis_max) LT 0.06` then 
+   define symbol  yaxis_max = 0.06
+   plot/vlim=0:($yaxis_max)/title="gaps less than 2 hours" delt
+else
+   plot/thick=2/vlim=0:($yaxis_max)/title="hour is 0.042" delt
+   say/outfile=gaps.list/append ($1)
+endif
+annotate/norm/xp=0.5/yp=1.04/halign=0/siz=0.12 ($1)

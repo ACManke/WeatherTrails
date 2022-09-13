@@ -1,0 +1,31 @@
+
+
+! Plot delta-t. will create a fixup script for files with gaps of more 
+! than an hour or so. See ambient_fill*.jnl
+
+go check_gap data/ambient-weather-20200708-20200731.nc; pause
+go check_gap data/ambient-weather-20200801-20200831.nc; pause
+go check_gap data/ambient-weather-20200901-20200930.nc; pause
+go check_gap data/ambient-weather-20201001-20201031.nc; pause
+go check_gap data/ambient-weather-20201101-20201130.nc; pause
+go check_gap data/ambient-weather-20201201-20201231.nc; pause
+go check_gap data/ambient-weather-20210101-20210131.nc; pause
+go check_gap data/ambient-weather-20210201-20210228.nc; pause
+go check_gap data/ambient-weather-20210301-20210331.nc; pause
+go check_gap data/ambient-weather-20210401-20210430.nc; pause
+go check_gap data/ambient-weather-20210501-20210531.nc; pause
+go check_gap data/ambient-weather-20210601-20210630.nc; pause
+go check_gap data/ambient-weather-20210701-20210731.nc; pause
+go check_gap data/ambient-weather-20210801-20210831.nc; pause
+go check_gap data/ambient-weather-20210901-20210930.nc; pause
+go check_gap data/ambient-weather-20211001-20211031.nc; pause
+go check_gap data/ambient-weather-20211101-20211130.nc; pause
+go check_gap data/ambient-weather-20211201-20211231.nc; pause
+go check_gap data/ambient-weather-20220101-20220131.nc; pause
+go check_gap data/ambient-weather-20220201-20220228.nc; pause
+go check_gap data/ambient-weather-20220301-20220331.nc; pause
+go check_gap data/ambient-weather-20220401-20220430.nc; pause
+go check_gap data/ambient-weather-20220501-20220531.nc; pause
+go check_gap data/ambient-weather-20220601-20220630.nc; pause
+go check_gap data/ambient-weather-20220701-20220731.nc; pause
+go check_gap data/ambient-weather-20220801-20220831.nc
