@@ -60,27 +60,29 @@ IF `rewrite EQ 1` THEN
 
 ! Date,Simple Date,Outdoor Temperature (°F),Feels Like (°F),Dew Point (°F),Wind Speed (mph),Wind Gust (mph),Max Daily Gust (mph),Wind Direction (°),Hourly Rain (in/hr),Event Rain (in),Daily Rain (in),Weekly Rain (in),Monthly Rain (in),Total Rain (in),Relative Pressure (inHg),Outdoor Humidity (%),Ultra-Violet Radiation Index,Solar Radiation (W/m^2),Indoor Temperature (°F),Indoor Humidity (%),Absolute Pressure (inHg),Outdoor Battery,Indoor Feels Like (°F),Indoor Dew Point (°F)
 
-! Read the file - variables that are going to be saved are named with short names such as ot_in for Outdoor Temperature.  The variable
-! will be reshaped to the time axis, and renamed at that time.
+! Read the file - variables that are going to be saved are named with short names such as ot_in for Outdoor Temperature.  
+! The variable will be reshaped to the time axis, and renamed at that time.
+
+! Name the "Outdoor" temperature, Humidity etc, without the word Outdoor.
 
 IF ($old) then
  file/skip=1/type="text,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num "\
  /var="date,ot_in,feel_in,dew_in,WindSpeed,WindGust,MaxDailyGust,WindDirection,hr_in,er_in,dr_in,WeeklyRain,MonthlyRain,\
- TotalRain,RelativePressure,OutdoorHumidity,UVRadiationIndex,SolarRadiation,it_in,IndoorHumidity,AbsolutePressure,\
- OutdoorBattery,IndoorFeels Like,IndoorDewPoint"/form=delim data/($infile)
+ TotalRain,RelativePressure,Humidity,UVRadiationIndex,SolarRadiation,it_in,IndoorHumidity,AbsolutePressure,\
+ Battery,IndoorFeels Like,IndoorDewPoint"/form=delim data/($infile)
 
 else
 
  file/skip=1/type="text,text,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num,num "\
  /var="date,simpledate,ot_in,feel_in,dew_in,WindSpeed,WindGust,MaxDailyGust,WindDirection,hr_in,er_in,dr_in,WeeklyRain,MonthlyRain,\
- TotalRain,RelativePressure,OutdoorHumidity,UVRadiationIndex,SolarRadiation,it_in,IndoorHumidity,AbsolutePressure,\
- OutdoorBattery,IndoorFeels Like,IndoorDewPoint"/form=delim data/($infile)
+ TotalRain,RelativePressure,Humidity,UVRadiationIndex,SolarRadiation,it_in,IndoorHumidity,AbsolutePressure,\
+ Battery,IndoorFeels Like,IndoorDewPoint"/form=delim data/($infile)
 
 endif
 
 ! Write date/time, variables we are keeping, in increasing time order to a new csv file
 
-say/clobber/outfile="data/($monthyear)_dates_incr.dat" "($month) ($year) Dates Increasing: Date,Outdoor Temperature,Feels Like,Dew Point,Wind Speed,Wind Gust,Max Daily Gust, Wind Direction, Indoor Temperature, Hourly Rain, Daily Rain, RelativePressure, OutdoorHumidity"
+say/clobber/outfile="data/($monthyear)_dates_incr.dat" "($month) ($year) Dates Increasing: Date,Temperature,Feels Like,Dew Point,Wind Speed,Wind Gust,Max Daily Gust, Wind Direction, Indoor Temperature, Hourly Rain, Daily Rain, RelativePressure, Humidity"
 
 
 let nr = `date,return=isize`
@@ -105,7 +107,7 @@ let itr = xreverse(missing(it_in,999))
 let hrr = xreverse(missing(hr_in,999))
 let drr = xreverse(missing(dr_in,999))
 let rpr = xreverse(missing(RelativePressure,999))
-let hum = xreverse(missing(OutdoorHumidity,999))
+let hum = xreverse(missing(Humidity,999))
 
 let date_o = substring(dater_in, 1, 10)
 let time_o = substring(dater_in, 12, 8)
@@ -149,7 +151,7 @@ set var/bad=999 pres_in
 set var/bad=999 hum_in
 
 let tt = t[gt=taxis]
-let/units="Deg F"/title="Outdoor Temperature" Outdoor_Temperature = reshape(ot_in, tt)
+let/units="Deg F"/title="Temperature" Temperature = reshape(ot_in, tt)
 let/units="Deg F"/title="Feels Like" Feels_Like = reshape(fee_in, tt)
 let/units="Deg F"/title="Dew Point" Dew_Point = reshape(dew_in, tt)
 let/units="Deg F"/title="Indoor Temperature" Indoor_Temperature = reshape(it_in, tt)
@@ -162,19 +164,19 @@ let/units="Degrees"/title="Wind Direction" WindDir = reshape(wdir_in, tt)
 let/units=Inch/title="Hourly Rain" Hourly_Rain = reshape(hr_in, tt)
 let/units=Inch/title="Daily Rain" Daily_Rain = reshape(dr_in, tt)
 let/units=Hg/title="Relative Pressure" Relative_Pressure = reshape(pres_in, tt)
-let/units=Percent/title="Outdoor Humidity" Outdoor_Humidity = reshape(hum_in, tt)
+let/units=Percent/title="Humidity" Humidity = reshape(hum_in, tt)
 
 show data! ; pause
-save/clobber/outtype=float/file="data/($outfile)" Outdoor_Temperature, Feels_Like, Dew_Point, Indoor_Temperature, \
- WindSpeed, WindGust, WindGustMax, WindDir, Hourly_Rain, Daily_Rain, Relative_Pressure, Outdoor_Humidity
+save/clobber/outtype=float/file="data/($outfile)" Temperature, Feels_Like, Dew_Point, Indoor_Temperature, \
+ WindSpeed, WindGust, WindGustMax, WindDir, Hourly_Rain, Daily_Rain, Relative_Pressure, Humidity
 
 cancel var/all
 cancel data/all
 use data/($outfile)
 
 set view upper
-plot/thick/color=blue outdoor_temperature,Indoor_Temperature
-plot/thick/color=blue/vlim=($yaxis_min):($yaxis_max)/title="temperature: Blue Outdoor, Red Indoor" Outdoor_Temperature
+plot/thick/color=blue temperature,Indoor_Temperature
+plot/thick/color=blue/vlim=($yaxis_min):($yaxis_max)/title="temperature: Blue Outdoor, Red Indoor" Temperature
 plot/over/nolab/color=red/thick Indoor_Temperature
 
 set view lower

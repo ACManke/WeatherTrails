@@ -6,12 +6,12 @@ set text/font=helvetica
 go ambient_aggregate.jnl
 
 ! Arguments
-!   $1  variable (default outdoor_temperature)
+!   $1  variable (default is temperature)
 !   $2  start date - by default use entire range
 !   $3  end date 
 
 
-define symbol var = outdoor_temperature
+define symbol var = temperature
 IF ($1"0|*>1") THEN define symbol var = ($1)
 
 
@@ -42,9 +42,9 @@ let ny = lasty - firsty + 1
 
 define axis/t=1-jan-`firsty`:31-dec-`lasty`:1/edges/units=days tday
 
-let/like=($var)/title="Daily Max Outdoor Temp" day_temp_max = ($var)[gt=tday@max]
+let/like=($var)/title="Daily Max Temp" day_temp_max = ($var)[gt=tday@max]
 
-let/like=($var)/title="Daily Min Outdoor Temp" day_temp_min = ($var)[gt=tday@min]
+let/like=($var)/title="Daily Min Temp" day_temp_min = ($var)[gt=tday@min]
 
 show var day*
 
@@ -62,7 +62,7 @@ annotate/norm/x=0/y=-0.3/siz=0.1  "Lowest Max `day_temp_max[($date_range)@min],p
 Say 
 Say 
 Say 
-Say Daily Outdoor Temperatures
+Say Daily Temperatures
 say Lowest Min `day_temp_min[($date_range)@min],p=4`  Highest Min  `day_temp_min[($date_range)@max],p=4`  
 say Lowest Max `day_temp_max[($date_range)@min],p=4`  Highest Max  `day_temp_max[($date_range)@max],p=4`  
 

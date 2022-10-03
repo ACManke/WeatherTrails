@@ -16,7 +16,7 @@ set win/aspect=0.5/siz=2
 
 go ambient_aggregate.jnl
 
-let tt = t[gt=outdoor_temperature]
+let tt = t[gt=temperature]
 let nt = `tt,return=size`
 
 let firsty = `tax_datestring(tt[L=1], tt, "year")`
@@ -27,7 +27,7 @@ let lasty = `lasty_s`
 let ny = lasty - firsty + 1
 define axis/t=1-jan-`firsty`:31-dec-`lasty`:1/edges/units=days tday
 
-let/like=outdoor_temperature/title="Daily Max Outdoor Temp" day_temp_max = outdoor_temperature[gt=tday@max]
+let/like=temperature/title="Daily Max Temp" day_temp_max = temperature[gt=tday@max]
 
 set region/t=1-jan-`yr`:31-dec-`yr`
 let/like=day_temp_max fill = day_temp_max[t=@fav]

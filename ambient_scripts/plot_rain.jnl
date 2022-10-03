@@ -5,12 +5,16 @@
 can mode logo
 
 cancel data/all
-cancel var/all
 cancel symbol/all
-cancel view
 
 set text/font=arial
-set win/asp=0.5/siz=2
+
+! If we've drawn other plots, open a new plot window
+IF ($win_title"0|*>1") THEN 
+   set window/new/aspect=0.5/size=2
+ELSE
+   set window/aspect=0.5/size=2
+ENDIF
 
 
 DEFINE SYMBOL reference = 0
@@ -108,7 +112,7 @@ define symbol plot_title = ($var_title), 5-day smoothed  <NL> ($color_label)
 define symbol plot_title = ($var_title)<NL> ($color_label)  ! *****
 
 ! plot range for this subset of dates. Handle case of small amount of rainfall.
-let ax_lo = -0.01
+let ax_lo = -0.002
 let ax_hi =  `INT(dax_hi + 0.5)`
 if `ax_hi eq 0` THEN let ax_hi =  `INT(10*dax_hi + 1)/10`
 

@@ -2,8 +2,8 @@
 
 ! plot_ambient.jnl
 ! Plot Ambient Weather data 
-!  For indoor or outdoor variable: 
-!    daily max, monthly overall max, monthly average of daily max
+!  For variable other than rainfall: 
+!    daily max, monthly overall max, monthly average of daily max, or
 !    daily min, monthly overall min, monthly average of daily min
 ! Color the data by year
 !
@@ -14,9 +14,8 @@
 !
 
 cancel data/all
-cancel var/all
 cancel symbol/all
-cancel view
+cancel mode logo
 
 ! Call plot_rain.jnl to plot daily and monthly rain totals.
 ! If no variable is entered, the script will list the variable names and stop.
@@ -24,6 +23,8 @@ cancel view
 
 ! Open the monthly datasets, aggregating in time
 go ambient_aggregate.jnl
+show data/brief
+list/norow/nohead ..varnames
 
 IF `($1"0|0|*>1") EQ 0` THEN
    say Arguments are 
@@ -33,7 +34,7 @@ IF `($1"0|0|*>1") EQ 0` THEN
    say
    SHOW DATA
    say
-EXIT/SCRIPT
+   EXIT/SCRIPT
 
 ENDIF
 
@@ -61,9 +62,9 @@ IF ($3"0|0|1|2>1|*>1") THEN
       DEFINE SYMBOL reference = 0
    ENDIF
 
-   IF `($reference) GT 0 AND (($var"|outdoor_temperature>1|daily_rain>1|*>0") EQ 0)` THEN
+   IF `($reference) GT 0 AND (($var"|temperature>1|daily_rain>1|*>0") EQ 0)` THEN
       say
-      say Everett or Seattle data plotted with Outdoor_Temperature or Daily_Rain only
+      say Everett or Seattle data plotted with Temperature or Daily_Rain only
       say Ignoring reference-data setting for ($var)
       DEFINE SYMBOL reference = 0
       say
@@ -76,10 +77,6 @@ IF ($var"|daily_rain>1|*>0") THEN
    GO plot_rain ($reference)
    EXIT/SCRIPT
 ENDIF
-
-
-cancel mode logo
-cancel view
 
 ! set mode ver:always
 set text/font=arial
