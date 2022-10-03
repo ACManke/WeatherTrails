@@ -1,0 +1,4 @@
+Build PyFerret in bash.  The bash session should have the miniconda version
+of PyFerret activated, in the .bashrc file, the setup for miniconda should
+be specified, and conda activate FERRET
+

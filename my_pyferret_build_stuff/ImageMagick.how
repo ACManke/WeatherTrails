@@ -1,0 +1,13 @@
+Looked into this to get compare of pdf's working.  Instead, just find the policy.xml file
+/etc/ImageMagick-6/policy.xml and comment out the line which says,
+
+ <policy domain="coder" rights="none" pattern="PDF" />
+
+
+
+
+https://andychukse.medium.com/how-to-install-imagemagick-with-ghostscript-libpng-libjpeg-support-on-ubuntu-20-04-4679a910416c
+
+ImageMagick® allow you to create, edit, compose, or convert bitmap images. It can read and write images in a variety of formats (over 200) including PNG, JPEG, GIF, HEIC, TIFF, DPX, EXR, WebP, Postscript, PDF, and SVG. ImageMagick can resize, flip, mirror, rotate, distort, shear and transform images, adjust image colors, apply various special effects, or draw text, lines, polygons, ellipses and Bézier curves
+...
+
