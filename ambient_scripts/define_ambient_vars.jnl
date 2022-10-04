@@ -1,0 +1,124 @@
+\cancel mode verify
+
+! define_ambient_monthly.jnl
+!  Ambient Weather data 
+!  For indoor or variable, define either
+!    daily max, monthly overall max, monthly average of daily max
+!    daily min, monthly overall min, monthly average of daily min
+!
+! Arguments are 
+! 1) var_name 
+! 2) transformation max or min (unused for daily_rain)
+
+cancel data/all
+cancel symbol/all
+
+! Does not apply to rainfall -
+! If no variable is entered, the script will list the variable names and stop.
+
+
+! Open the monthly datasets, aggregating in time
+go ambient_aggregate.jnl
+
+IF `($1"0|0|*>1") EQ 0` THEN
+   say 
+   say ****** Arguments are 
+   say   1) var_name 
+   say   2) transformation max or min 
+   say
+   SHOW DATA
+   say 
+   say ******
+   EXIT/SCRIPT
+
+ENDIF
+
+DEFINE SYMBOL var = `dncase("($1)")`
+
+IF ($var"0|rain>1|hourly_rain>1|daily_rain>1|*>0") THEN
+   DEFINE SYMBOL var = daily_rain
+   GO define_ambient_rain_vars
+   EXIT/SCRIPT
+ENDIF
+
+IF `($2"0|0|max>1|min>1|*>0") EQ 0` THEN
+   say ****** Argument 2 transformation max or min ******
+   say
+   EXIT/SCRIPT
+ELSE
+   DEFINE SYMBOL trans = `dncase("($2)")`
+ENDIF
+
+
+LET tt = t[gt=($var)]
+
+LET nt = `tt,return=size`
+
+LET firsty = `tax_datestring(tt[L=1], tt, "year")`
+LET lasty_s = tax_datestring(tt[L=`nt`], tt, "year")
+LET lasty = `lasty_s`
+
+LET ny = lasty - firsty + 1
+
+! The variable and transformation are defined as symbols 
+! ($var) and ($trans)
+
+define symbol trans_title = ($trans"|max>High|min>Low")
+! Daily axis. Start 2 months before the start of the first year, as in
+! plot scripts
+
+define axis/t=1-nov-`firsty-1`:1-jan-`lasty+1`:1/edges/units=days tday
+
+let/like=($var)/title="`($var),return=title` ($trans)" ($var)_day_($trans) = ($var)[gt=tday@($trans)]
+
+define symbol var_title = Daily ($trans_title) `($var),return=title`
+
+define symbol plot_title = ($var_title)  <NL> ($color_label)
+
+
+! ---------------------------------------------------------------------
+!  Monthly data
+! Define a monthly axis starting in Jan `firsty`
+
+LET start_year = `firsty`
+
+LET indices = L[L=1:`ny*12 + 1`]
+LET month = MOD(indices-1,12)+1
+LET year = start_year + INT((indices-1)/12)
+DEFINE AXIS/UNITS=days/T0=1-jan-1900/EDGES tmonth = DAYS1900(year,month,1)
+
+
+! ---------------------------------------------------------------------
+!  Monthly Maximum or Minimum  
+
+define symbol units = `($var),return=units`
+
+let/units="($units)" ($var)_month_($trans) =  ($var)_day_($trans)[gt=tmonth@($trans)]
+let/units="($units)" month_temp =  if ($var)_month_($trans) then ($var)_month_($trans) else 0
+
+
+! ---------------------------------------------------------------------
+
+!  Monthly Average of day high/low
+
+let/units="($units)"  ($var)_month_ave_($trans) =  ($var)_day_($trans)[gt=tmonth@ave]
+let/units="($units)" month_temp =  if ($var)_month_ave_($trans) then ($var)_month_ave_($trans) else 0
+
+! ---------------------------------------------------------------------
+
+! Cancel intermediate variables
+
+cancel variable MONTH_TEMP 
+cancel variable YEAR
+cancel variable MONTH
+cancel variable INDICES
+cancel variable START_YEAR
+cancel variable NY
+cancel variable LASTY
+cancel variable LASTY_S
+cancel variable FIRSTY
+cancel variable NT
+cancel variable TT
+cancel variable FILELIST
+
+show variable ($var)*

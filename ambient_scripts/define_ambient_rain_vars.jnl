@@ -1,0 +1,65 @@
+\cancel mode verify
+
+! define_ambient_rain_vars
+! Define variables - daily rain, monthly rain, ?accumulations?
+can mode logo
+
+cancel data/all
+cancel symbol/all
+
+! Define aggregate timeseries dataset
+go ambient_aggregate.jnl
+
+let ttrain = t[gt=hourly_rain]
+
+let nt = `ttrain,return=size`
+
+let firsty = `tax_datestring(ttrain[L=1], ttrain, "year")`
+let lasty_s = tax_datestring(ttrain[L=`nt`], ttrain, "year")
+let lasty = `lasty_s`
+
+
+let ny = lasty - firsty + 1
+
+! Daily axis. Start 2 months before the start of the first year, 
+! as inplot scripts
+
+define axis/t=1-nov-`firsty-1`:1-jan-`lasty+1`:1/edges/units=days tday
+
+
+! Define daily rain totals, filling in first year
+
+let ttrain = t[gt=tday]
+let tmask = if ttrain ge `ttrain[t=1-jul-2020]` then 1
+
+let/like=daily_rain day_rain = if daily_rain[gt=tday@max] then tmask* daily_rain[gt=tday@max] else 0 
+
+
+! Define a monthly axis starting in Jan 2020
+
+LET start_year = `firsty`
+
+LET indices = L[L=1:`ny*12 + 1`]
+LET month = MOD(indices-1,12)+1
+LET year = start_year + INT((indices-1)/12)
+DEFINE AXIS/UNITS=days/T0=1-jan-1900/EDGES tmonth = DAYS1900(year,month,1)
+
+let/like=day_rain/title="monthly rain" month_rain = if day_rain[gt=tmonth@sum] then day_rain[gt=tmonth@sum] else 0
+
+
+! ---------------------------------------------------------------------
+
+! Cancel intermediate variables
+
+cancel variable YEAR
+cancel variable MONTH
+cancel variable INDICES
+cancel variable START_YEAR
+cancel variable NY
+cancel variable LASTY
+cancel variable LASTY_S
+cancel variable FIRSTY
+cancel variable NT
+cancel variable FILELIST
+
+show var *rain*
