@@ -108,11 +108,15 @@ let hrr = xreverse(missing(hr_in,999))
 let drr = xreverse(missing(dr_in,999))
 let rpr = xreverse(missing(RelativePressure,999))
 let hum = xreverse(missing(Humidity,999))
+let uv = xreverse(missing(UVRadiationIndex,999))
+let sol = xreverse(missing(SolarRadiation,999))
 
 let date_o = substring(dater_in, 1, 10)
 let time_o = substring(dater_in, 12, 8)
 
-list/append/file="data/($monthyear)_dates_incr.dat"/form=(a10,a10,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2)/norow/nohead date_o,time_o,otr,feelr,dewr,wspdr,wgustr,wgustmaxr,wdirr,itr,hrr,drr,rpr,hum
+list/append/file="data/($monthyear)_dates_incr.dat"/\
+form=(a10,a10,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2)/norow/nohead \
+ date_o,time_o,otr,feelr,dewr,wspdr,wgustr,wgustmaxr,wdirr,itr,hrr,drr,rpr,hum,uv,sol
 
 IF `substring(date_o[i=1],6,2) eq "11"` THEN
  say
@@ -122,15 +126,16 @@ IF `substring(date_o[i=1],6,2) eq "11"` THEN
  say
 ENDIF
 
+
 ENDIF  ! rewrite
 
 ! Read this file and define the time axis.
 
 
 cancel data/all
-file/delim=" "/skip=1/type="date,time,num,num,num,num,num,num,num,num,num,num,num,num"/var=\
+file/delim=" "/skip=1/type="date,time,num,num,num,num,num,num,num,num,num,num,num,num,num,num"/var=\
 "date,time,ot_in,fee_in,dew_in,wspd_in,wgust_in,wgustmax_in,wdir_in,it_in,hr_in,dr_in,\
-pres_in,hum_in"/form=delim data/($monthyear)_dates_incr.dat
+pres_in,hum_in,uv_in,sol_in"/form=delim data/($monthyear)_dates_incr.dat
 
 ! Define the time axis from the dates 
 ! Save as a netCDF file.
@@ -149,6 +154,8 @@ set var/bad=999 hr_in
 set var/bad=999 dr_in
 set var/bad=999 pres_in
 set var/bad=999 hum_in
+set var/bad=999 uv_in
+set var/bad=999 sol_in
 
 let tt = t[gt=taxis]
 let/units="Deg F"/title="Temperature" Temperature = reshape(ot_in, tt)
@@ -165,10 +172,11 @@ let/units=Inch/title="Hourly Rain" Hourly_Rain = reshape(hr_in, tt)
 let/units=Inch/title="Daily Rain" Daily_Rain = reshape(dr_in, tt)
 let/units=Hg/title="Relative Pressure" Relative_Pressure = reshape(pres_in, tt)
 let/units=Percent/title="Humidity" Humidity = reshape(hum_in, tt)
+let/units=" "/title="Ultra-Violet Radiation Index" uv_index = reshape(uv_in, tt)
+let/units="W/m^2"/title="Solar Radiation" solar_rad = reshape(sol_in, tt)
 
-show data! ; pause
 save/clobber/outtype=float/file="data/($outfile)" Temperature, Feels_Like, Dew_Point, Indoor_Temperature, \
- WindSpeed, WindGust, WindGustMax, WindDir, Hourly_Rain, Daily_Rain, Relative_Pressure, Humidity
+ WindSpeed, WindGust, WindGustMax, WindDir, Hourly_Rain, Daily_Rain, Relative_Pressure, Humidity, uv_index, solar_rad
 
 cancel var/all
 cancel data/all
@@ -184,4 +192,5 @@ plot Hourly_Rain, Daily_Rain
 
 plot/thick/color=blue/vlim=($yaxis_min):($yaxis_max) Hourly_Rain
 plot/over/nolab/thick/color=green/thick Daily_Rain
-pause
+
+sp sleep 1
