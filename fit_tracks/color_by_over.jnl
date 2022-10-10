@@ -82,7 +82,7 @@ IF ($var"|pactime>1|*>0") THEN
    ribbon/vs/line/thick=2/pal=($palette)($qualifiers)/set/nokey/hlim=`xmin-xdel`:`xmax+xdel`/vlim=`ymin-ydel`:`ymax+ydel`   longitude, latitude, ($var)
       ppl xfor (f7.3)
       ppl yfor (f6.3)
-      go unlabel ($labnum_t) 
+      IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t) 
    ppl ribbon
 
    
@@ -95,7 +95,7 @@ ELSE
    ribbon/over/vs/line/thick=2/pal=($palette)($qualifiers)/set/hlim=`xmin-xdel`:`xmax+xdel`/vlim=`ymin-ydel`:`ymax+ydel`   longitude, latitude, ($var)
       ppl xfor (f7.3)
       ppl yfor (f6.3)
-      go unlabel ($labnum_t) 
+      IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t) 
    ppl ribbon/over
 
 

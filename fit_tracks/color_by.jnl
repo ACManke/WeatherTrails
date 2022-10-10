@@ -10,7 +10,7 @@
 ! as an activity. Download the zip file and unzip it. The tcx files are xml. Copy to fit_tracks/data
 !
 !
-! Tool to convert xml to csv: https://data.page/xml/csv, save the file.
+! Use this tool to convert xml to csv: https://data.page/xml/csv, save the file.
 ! Import this into Google Sheets (Drive, New, File Upload; choose the file then Open With Sheets)
 ! Get rid of extra columns and rows, and Download as a csv.  Edit to add a header of 5 lines, 
 ! change the T in date/time to space, remove the Z. Check for lines at the end.
@@ -97,8 +97,9 @@ let latmax = `latitude[L=@max]`
 
 let aspect = MAX(0.4, (latmax- latmin)/(lonmax - lonmin))
 
-set window/aspect=`aspect`/siz=2
+set window/aspect=`aspect`/siz=3
 IF ($var"|pactime>1|*>0") THEN set view xyview
+go margins 0.8 1 1.2 1
 
 let xdel = 0.05*(lonmax - lonmin)
 let ydel = (0.1/aspect)* (latmax- latmin)
@@ -118,7 +119,7 @@ IF ($var"|pactime>1|*>0") THEN
    ribbon/vs/line/thick=3/pal=($palette)($qualifiers)/set/nokey/hlim=`lonmin-xdel`:`lonmax+xdel`/vlim=`latmin-ydel`:`latmax+ydel`   longitude, latitude, ($var)
       ppl xfor (f7.3)
       ppl yfor (f7.4)
-      go unlabel ($labnum_t) 
+      IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)  
    ppl ribbon
 
    
@@ -131,7 +132,7 @@ ELSE
    ribbon/vs/line/thick=3/pal=($palette)($qualifiers)/set/hlim=`lonmin-xdel`:`lonmax+xdel`/vlim=`latmin-ydel`:`latmax+ydel`   longitude, latitude, ($var)
       ppl xfor (f7.3)
       ppl yfor (f7.4)
-      go unlabel ($labnum_t) 
+      IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t) 
    ppl ribbon
 
 
