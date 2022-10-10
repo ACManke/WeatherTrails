@@ -134,7 +134,7 @@ DEFINE AXIS/UNITS=days/T0=1-jan-1900/EDGES tmonth = DAYS1900(year,month,1)
 go color_labels 01-Jan 31-Dec
 
 ! ---------------------------------------------------------------------
-!  Monthly Maximum or Minimum high 
+!  Monthly Maximum or Minimum 
 
 set window/new/size=2/aspect=1
 define symbol units = `($var),return=units`

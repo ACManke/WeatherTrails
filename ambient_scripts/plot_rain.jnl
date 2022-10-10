@@ -174,7 +174,7 @@ let month_max = INT(month_rain[t=@max]) + 2
 ! What's the month_rain-sum max?  Use it for the v-limits of the month_rain accumulations
 
 let month_rain1 =  day_rain[gt=tmonth@sum]
-let/like=day_rain/title="month_rain Sum rain" month_rain = if month_rain1 then month_rain1 else 0
+let/like=day_rain/title="monthly rain" month_rain = if month_rain1 then month_rain1 else 0
 let month_max = `INT(month_rain[t=@max]) + 2`
 
 
