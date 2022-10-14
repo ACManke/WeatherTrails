@@ -110,6 +110,8 @@ endif
 			  -fdefault-double-8 \
 			  $(MYDEFINES) $(MYINCLUDES)
 
+# If using gcc / gfortran versions higher than 8 andif seeing compiler 
+# errors in the code, can add the following flag to PPLUS_FLAGS:    -std=legacy 
 	PPLUS_FFLAGS	= -m64 -fPIC \
 			  -fno-automatic \
 			  -fno-second-underscore \

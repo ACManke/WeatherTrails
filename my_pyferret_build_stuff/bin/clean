@@ -9,3 +9,9 @@ rmlist "*.out"
 
 echo " "
 rmlist "ferret.jnl.*~"
+
+echo " "
+rmlist "*.png.*~"
+
+echo " "
+rmlist "*.pdf.*~"
