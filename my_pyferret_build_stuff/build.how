@@ -2,3 +2,135 @@ Build PyFerret in bash.  The bash session should have the miniconda version
 of PyFerret activated, in the .bashrc file, the setup for miniconda should
 be specified, and conda activate FERRET
 
+
+This from email "Linux on PC Oct 2020 ubuntu/pyferret" updated 9/5/2022
+Updates 9/1/2022, reinstall under windows 11
+
+//////////////////
+
+https://www.howtogeek.com/261188/how-to-uninstall-or-reinstall-windows-10s-ubuntu-bash-shell/
+
+"How to Uninstall the Ubuntu Environment and Keep your Home Folder" says to use wsl --unregister DistrubutionName
+
+so try
+
+> wsl --unregister Ubuntu-20.04
+
+
+This does not preserve the /home directory...
+
+Renamed the CanonicalGropLimited... package under C\Users\ansman\AppData\Packages
+
+Reinstall:
+
+> wsl --install -d Ubuntu-20.04
+
+
+ * This, about getting an ssh key set up to use with Github
+
+https://medium.com/featurepreneur/setting-up-ssh-key-with-github-for-ubuntu-cd8f2fabf25b
+
+* This, about installing PyFerret with python3.9+
+
+https://github.com/conda-forge/pyferret-feedstock/issues/94
+
+//////////////////
+
+
+Following:
+
+https://docs.microsoft.com/en-us/windows/wsl/install-win10
+
+To open Windows PowerShell, hit Windows-X.  PowerShell for admin is one of the choices. Now called Windows Terminal (admin)]
+
+Steps 1, 2, 3, 4. There is an option for a new WSL 2, which I installed, but see # 5.
+
+Step 5 I decided to use WSL 1, as WSL 2 has differences having to do with interacting with Windows files and Xming.  I see pages that show how to run X11 applications and access filesystems between WSL 2 and Windows,  but I know how to do the install with with WSL 1 so staying with that. In Powershell,
+
+     > wsl --set-default-version 1
+
+Step 6 Install Ubuntu, I installed the latest 20.04, Set a Username and Password
+
+
+Install Xming and xterm
+
+Under Windows, install Xming, using all the defaults. 
+
+
+In Ubuntu window, call update to update the package definitions, then get xterm
+
+> sudo apt-get update
+
+> sudo apt-get install xterm
+
+> export DISPLAY=:0
+
+
+Xming needs better fonts.  http://www.straightrunning.com/XmingNotes/  Takes you to the fonts download:
+
+https://sourceforge.net/projects/xming/files/Xming-fonts/7.7.0.10/Xming-fonts-7-7-0-10-setup.exe/download
+
+
+Install miniconda and PyFerret.
+
+Make a Directory called Downloads under the Linux home directory.
+
+From Windows, the linux home directory is under:
+
+C:\Users\ansley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu20.04onWindows_*****\LocalState\rootfs\home\ansley
+
+
+Follow the PyFerret README instructions to install PyFerret.
+https://github.com/NOAA-PMEL/PyFerret/blob/master/README.md
+
+From a Windows browser, get Miniconda,  saving the install file to the ...\home\ansley\Downloads directory.  Choose Miniconda with Python 3.* for Linux, 64-bit.  It's a shell script, execute it to install Miniconda.
+
+
+Install by executing the .sh file.  From the Downloads directory,
+
+   > bash Miniconda3-latest-Linux-x86-64.sh
+
+In the home directory, execute your .bashrc to initialize conda.con
+
+
+Get and install PyFerret and the example datasets
+
+   > conda create -n FERRET -c conda-forge pyferret ferret_datasets python=3.9 --yes   [NOTE the added python version, see notes at the start above]
+
+Execute this to set up the environment.  This line can be put in the .bashrc file, at the end after the conda stuff, and then "pyferret" is defined.
+
+   > conda activate FERRET
+
+   > pyferret
+        NOAA/PMEL TMAP
+        PyFerret v7.63 (optimized)
+        Linux 4.15.0-1096-azure - 10/13/20
+        29-Oct-20 11:05    
+
+yes?
+
+
+when drawing a plot writes some error messages but does open a window and make the plot.
+
+
+
+sudo apt-get install gfortran
+
+also gets gcc
+
+(Current is gcc-9 and gfortran-9.  Prev. PC had version -7.  With -9 I can't build a running version of pyferret -- try 7.
+
+    Update the package index:
+
+    # sudo apt-get update
+
+    Install gfortran-7 deb package:
+
+    # sudo apt-get install gfortran-7
+
+Then go change symbolic links to gfortran and gcc in /usr/bin  and /usr/lib
+
+
+This works!
+
+
