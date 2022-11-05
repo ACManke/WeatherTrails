@@ -23,7 +23,18 @@ INSTALL_FER_DIR = $(HOME)/my_fork_pyferret
 ##   i386-linux-gnu    for 32-bit Ubuntu and many "free" Linux systems
 ##   intel-mac         for Mac OSX
 ## =========================
-BUILDTYPE = x86_64-linux
+BUILDTYPE = x86_64-linux_ansman
+
+## =========================
+## C and Fortran compilers to use.  The construct "$(shell which gcc)" assigns
+## the response to "which gcc" run from a Bourne shell (such as bash).
+## When compiling for Mac OS X, one may wish to use clang instead of gcc.
+## If you wish to use values already defined in you shell environment when 
+## you run make, comment out all definitions of CC and FC (do NOT leave blank).
+## =========================
+# CC = $(shell which clang)
+CC = $(shell which gcc)
+FC = $(shell which gfortran)
 
 ## =========================
 ## Python executable to invoke for build and install.
