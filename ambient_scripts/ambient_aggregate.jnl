@@ -9,12 +9,15 @@ let filelist = spawn("ls -1 data/ambient-weather-202*.nc")
 ! Define the aggregation - cancel first if it's already defined
 
 IF `dew_point,return=isready` THEN 
-   define symbol dname = dew_point,return=dset`
+   define symbol dname = `dew_point,return=dset`
    IF  ($dname"0|ambient>1|*>0") THEN cancel data ambient
 endif
 
+
 tseries ambient = filelist
+set var/title="Outdoor Temperature" temperature
 show data/brief
 
-! plot dew_point
+
+set mode/last verify
 
