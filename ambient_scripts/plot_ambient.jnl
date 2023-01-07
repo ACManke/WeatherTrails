@@ -3,8 +3,8 @@
 ! plot_ambient.jnl
 ! Plot Ambient Weather data 
 !  For variable other than rainfall: 
-!    daily max, monthly overall max, monthly average of daily max, or
-!    daily min, monthly overall min, monthly average of daily min
+!    daily max, monthly max, monthly average high, or
+!    daily min, monthly min, monthly average low
 ! Color the data by year
 !
 ! Arguments are 

@@ -140,7 +140,7 @@ set window/new/size=2/aspect=1
 define symbol units = `($var),return=units`
 
 
-define symbol plot_annotation = ($trans_title)est Daily `($var),return=title` in month (($units))
+define symbol plot_annotation = ($trans_title)est `($var),return=title` (($units))
 
 
 let/units="($units)" ($var)_month_($trans) =  ($var)_day_($trans)[gt=tmonth@($trans)]
@@ -196,9 +196,9 @@ message now average monthly
 set window/new/title="Average ($var)"/size=2/aspect=1
 
 
-!  Monthly Average of day high/low
+!  Monthly Average high/low
 
-define symbol plot_annotation = Monthly Average of Daily ($trans_title) `($var),return=title` (($units))
+define symbol plot_annotation = Monthly Average ($trans_title) `($var),return=title` (($units))
 
 let/units="($units)"  ($var)_month_ave_($trans) =  ($var)_day_($trans)[gt=tmonth@ave]
 let/units="($units)" month_temp =  if ($var)_month_ave_($trans) then ($var)_month_ave_($trans) else 0

@@ -120,28 +120,42 @@ define symbol plotstyle = ($plotstyle)/vlim=`ax_lo`:`ax_hi`
 
 ! Set the plot-style
 define symbol plotstyle=($plotstyle)/thick=2
-define symbol plotstyle=($plotstyle)/step=connected ! *****
+define symbol plotstyle=($plotstyle)/step=connected 
 
+! All years in different colors. This is kind of a mess.
 
-set view full
-define symbol timerange = /t=($date1)-`firsty`:($date2)-`firsty`
-IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`firsty-1`:($date2)-`firsty`
-plot($plotstyle)/color=($color1)($timerange)/title="($plot_title)"/set var
+! set view full
+! define symbol timerange = /t=($date1)-`firsty`:($date2)-`firsty`
+! IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`firsty-1`:($date2)-`firsty`
+! plot($plotstyle)/color=($color1)($timerange)/title="($plot_title)"/set var
+!    IF ($labnum_year"0|*>1") THEN go unlabel ($lab($labnum_year))
+!    ppl plot
+! 
+! let yr = firsty+1
+! repeat/range=2:`ny`/name=yy (\
+! define symbol yy = `yy`;\
+! set view full($yy);\
+! define symbol timerange = /t=($date1)-`yr`:($date2)-`yr`;\
+! IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`yr-1`:($date2)-`yr`;\
+! plot($plotstyle)/color=($color($yy))/axes=0,0,0,0/nolab($timerange) var;\
+! let yr = `yr + 1`)
+! 
+
+! Plot daily rain for this year, date1 through date2
+
+cancel view
+let tl = tt[L=@max]
+define symbol yy = `ny`
+define symbol thisyear = `tax_datestring(tl, tl, "year")`
+define symbol timerange = /t=($date1)-($thisyear):($date2)-($thisyear)
+IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`($thisyear)`:($date2)-($thisyear)
+plot($plotstyle)/color=($color($yy))($timerange)/title="($date1)-`($thisyear)`  to  ($date2)-($thisyear)"/set var
    IF ($labnum_year"0|*>1") THEN go unlabel ($lab($labnum_year))
    ppl plot
 
-let yr = firsty+1
-repeat/range=2:`ny`/name=yy (\
-define symbol yy = `yy`;\
-set view full($yy);\
-define symbol timerange = /t=($date1)-`yr`:($date2)-`yr`;\
-IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`yr-1`:($date2)-`yr`;\
-plot($plotstyle)/color=($color($yy))/axes=0,0,0,0/nolab($timerange) var;\
-let yr = `yr + 1`)
 annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather Recent `($var),return=title` Data"
 
-message Plotting smoothed data for ($date1) to ($date2).  Edit plot_rain.jnl to change the date range
-
+message Plotting data for ($date1)-`($thisyear)-1` to ($date2)-($thisyear).  Edit plot_rain.jnl to change the date range
 cancel symbol yrm
 
 ! What's the overall min/max?  Use for the v-limits 
@@ -165,6 +179,7 @@ set window/new/title="Monthly Rain"/size=2/aspect=1
 
 ! Plot accumulated rain in each month
 set view lower
+go margins 1.4 1 1.2 1.0
 
 
 let month_min = 0
@@ -187,7 +202,7 @@ ENDIF
 ! Color labels for the whole series
 go color_labels 01-Jan 31-Dec
 
-define symbol plot_title = Monthly Rain Accumulation <NL> ($color_label)
+cancel symbol plot_title
 
 let tt = t[gt=tday]
 
@@ -198,19 +213,29 @@ let yr = firsty + 1
 repeat/range=2:`ny`/name=yy (\
 define symbol yy = `yy`;\
 set view lower($yy);\
+go margins 1.4 1 1.2 1.0;\
 go month_rain `yr` ($color($yy));\
 let yr = `yr + 1`)
 
 IF ($reference) THEN
    set view lower4
+   go margins 1.4 1 1.2 1.0
    use ($reference_data)
    plot/vlim=`ax_lo`:`month_max`/noax/($graystyle) rain
    set data 1
 endif
 
+annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "Monthly Rain Accumulation <NL> ($color_label)"
+
+! Block out the year labels
+define view/axes/x=0.45:0.55/y=0.08:0.11 block
+define view/axes/x=0.45:0.55/y=0.04:0.07 block
+set view block
+shade/nolab/noax/pal=white/x=0:5/y=0:5/nokey x+y
+
 ! Draw a bar-chart showing month_rain
 set view upper
-
+go margins 1.4 1 1.2 1.0
 
 let tm = t[gt=tmonth]
 let color = strfloat(tax_datestring(tm, tm, "year")) - 2019
@@ -251,11 +276,15 @@ IF ($reference) THEN
    define symbol list_quals = /nohead/norow/prec=3/format=(a, f10.1, f10.1, f12.1, f10.1)
 
    say
-   say Month      MonthRain YearAccum     ($reference_name)   ($reference_name)Accum
+   say Month      MonthRain YearAccum   Month Rain  YearAccum
+   say Month      Clinton   Clinton     ($reference_name)       ($reference_name)
    say
 
    list($list_quals)/t=($timerange) modate, month_rain, rainsum, ($reference_name), ($reference_name)sum
    say
+
+   define sym enddate = 31-dec-`firsty`
+   define symbol year_sums = Yearly Totals: `firsty` `rainsum[t=($enddate)],p=3`
 
    let yr = firsty+1
    repeat/range=2:`ny`/name=yy (\
@@ -264,6 +293,8 @@ IF ($reference) THEN
    let rainsum = month_rain[t=($timerange)@rsum];\
    let ($reference_name)sum = ($reference_name)[t=($timerange)@rsum];\
    list($list_quals)/t=($timerange)  modate, month_rain, rainsum, ($reference_name), ($reference_name)sum;\
+   define sym enddate = 31-dec-`yr`;\
+   define symbol year_sums = ($year_sums),   `yr` `rainsum[t=($enddate)],p=3`;\
    say;\
    let yr = `yr + 1`)
 
@@ -278,6 +309,10 @@ else
    let rainsum = month_rain[t=`TAX_DATESTRING(tin[L=1], tin, "day")`:31-dec-`firsty`@rsum]
    list($list_quals)/t=`TAX_DATESTRING(tin[L=1], tin, "day")`:31-dec-`firsty` modate, month_rain, rainsum
    say
+   
+
+   define sym enddate = 31-dec-`firsty`
+   define symbol year_sums = Clinton Yearly Totals:: `firsty` `rainsum[t=($enddate)],p=3`
 
    let yr = firsty+1
    repeat/range=2:`ny`/name=yy (\
@@ -285,6 +320,8 @@ else
    IF `yy EQ ny` THEN define symbol timerange = 1-jan-`yr`:`TAX_DATESTRING(tin[L=@max], tin, "day")`;\
    let rainsum = month_rain[t=($timerange)@rsum];\
    list($list_quals)/t=($timerange) modate, month_rain, rainsum;\
+   define sym enddate = 31-dec-`yr`;\
+   define symbol year_sums = ($year_sums),  `yr` `rainsum[t=($enddate)],p=3`;\
    say;\
    let yr = `yr + 1`)
 
@@ -295,6 +332,9 @@ else
 
 let yr = firsty
 
-
-
 endif
+
+set view full
+plot/noax/nolab/hlim=100:200/i=1:3 i
+annotate/norm/x=0.5/y=-0.17/siz=0.12/halign=0 "($year_sums)"
+

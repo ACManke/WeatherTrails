@@ -131,6 +131,13 @@ also gets gcc
 Then go change symbolic links to gfortran and gcc in /usr/bin  and /usr/lib
 
 
-This works!
+
+
+12/2022 version for gcc and gfortran is now  9.4.0.   Update to 10  (tried 11 but "E: Unable to locate package gcc-11")
+
+# sudo apt-get install gcc-10
+# sudo apt-get install gfortran-10
+
+(but nothing happened...  still says 9.4.0)
 
 

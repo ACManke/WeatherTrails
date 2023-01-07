@@ -60,9 +60,4 @@ let jan_1 = tt[t=1-jan-`year+1`]
 let dec = if t[gt=day_rain] ge `dec_1` and t[gt=day_rain] lt `jan_1` then day_rain[t=@rsum] else 0
 plot/line/over/nolab/color=($color)/thick/t=1-dec-`year`:1-jan-`year+1` dec
 
-! Block out the year labels
-define view/axes/x=0.45:0.55/y=0.08:0.11 block
-set view block
-shade/nolab/noax/pal=white/x=0:5/y=0:5/nokey x+y
-
 ! IF `($yy) LT ny` THEN sp sleep 1

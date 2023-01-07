@@ -1,20 +1,33 @@
 ! rainbow temperature scarf of one year
 !
 can mode logo
+set mode ver
 
-set mode ver:always
 cancel data/all
 cancel var/all
 cancel symbol/all
 cancel view
+cancel region
+
+set mode calendar:day
 
 set text/font=arial
-let yr = ($1%2021%)
+define view/axes/x=0:1/y=0:1 nomargin
+
+let yr = $1%2021%
+define symbol start_day = $2%20-sep%
+define symbol palette = $3%rnb2%
+
 
 cancel view
-set win/aspect=0.5/siz=2
 
 go ambient_aggregate.jnl
+
+let deld = 5/(24*60)  ! delta 5 minutes, units of a day
+define axis/t="1-jan-2020:00:00":"31-dec-2022:23:55":`deld`/units=days/t0="1-jan-2020:00:00"/edges time5
+set var/name=temp_in temperature
+let/like=temp_in temperature = temp_in[gt=time5]
+
 
 let tt = t[gt=temperature]
 let nt = `tt,return=size`
@@ -27,42 +40,80 @@ let lasty = `lasty_s`
 let ny = lasty - firsty + 1
 define axis/t=1-jan-`firsty`:31-dec-`lasty`:1/edges/units=days tday
 
-let/like=temperature/title="Daily Max Temp" day_temp_max = temperature[gt=tday@max]
+
+let/like=temperature temp_max = temperature[gt=tday@max]
+let/like=temperature temp_min = temperature[gt=tday@min]
 
 set region/t=1-jan-`yr`:31-dec-`yr`
-let/like=day_temp_max fill = day_temp_max[t=@fav]
+set region/t=($start_day)-`yr-1`:($start_day)-`yr`
+if ($start_day%|1-jan>1|01-jan>1|*>0%) then \
+   set region/t=($start_day)-`yr`:31-dec-`yr`
 
-plot/thick/color=blue fill
-define ax/x=1:2:1 xax
 
-let/like=day_temp_max day2d  = fill +  0*X[GX=XAX]
+! set region/t=1-nov-`yr-1`:1-nov-`yr`
 
-set mode ver
+let/like=temperature/title="Daily Max Temp" day_temp_max = temp_max[t=@fav]
+let/like=temperature/title="Daily Min Temp" day_temp_min = temp_min[t=@fav]
 
-shade/trans/pal=rnb2/title=rnb2/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rnb/title=rnb/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rainbow/title=rainbow/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rainbow2_cmyk/title=rainbow2_cmyk/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rainbow3/title=rainbow3/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rainbow_cmyk/title=rainbow_cmyk/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rainbow_lilac_darkred/title=rainbow_lilac_darkred/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=rainbow_rgb/title=rainbow_rgb/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=blue_green_yellow/title=blue_green_yellow/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=centered_turq_red_purple/title=centered_turq_red_purple/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=blue_purple_orange/title=blue_purple_orange/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_algae/title=cmocean_algae/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_amp/title=cmocean_amp/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_balance/title=cmocean_balance/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_curl/title=cmocean_curl/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_deep/title=cmocean_deep/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_delta/title=cmocean_delta/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_dense/title=cmocean_dense/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_gray/title=cmocean_gray/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_haline/title=cmocean_haline/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_ice/title=cmocean_ice/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_matter/title=cmocean_matter/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_solar/title=cmocean_solar/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_speed/title=cmocean_speed/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_tempo/title=cmocean_tempo/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_thermal/title=cmocean_thermal/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
-shade/trans/pal=cmocean_turbid/title=cmocean_turbid/lev=(-inf)(30,90,5)(inf)/key=cent day2d; pause
+let/like=temperature/title="Daily Max Temp" day_temp_max = temp_max[gt=time5]
+let/like=temperature/title="Daily Min Temp" day_temp_min = temp_min[gt=time5]
+
+define ax/y=1:2:1/units=hours yax
+let yy = y[gy=yax]
+
+
+let tempmax2d = day_temp_max + 0*yy
+let tempmin2d = day_temp_min + 0*yy
+
+let temp2d_a = if yy eq 1 then tempmin2d else 0
+let temp2d_b = if yy eq 2 then tempmax2d else 0
+
+let day2d = temp2d_a + temp2d_b
+define symbol levs = (-inf)(30,90,5)(inf)
+
+! set window/siz=2
+! set view upper
+! go margins .8 .8
+! 
+! 
+! shade/pal=($palette)/title="Low and High Daily Temperature"/lev=($levs)/set day2d
+!  ppl ylab "`temperature,return=units`"
+! ppl shade
+
+! set view lower
+! go margins .8 .8
+
+
+define axis/y=0:24:0.1/units=hours yax
+let yy = y[gy=yax]
+let yy2d = yy + 0*ll
+
+go hours_per_day 0 0
+let ll  = (tt - `tt[L=1]`)  ! axis of the temperature data
+
+let yy2d = yy + 0*ll
+let daylen2d = 24 - daylen+ 0*yy
+
+let mask1 = if yy2d lt daylen2d then 1
+
+
+let aspect = 24*6/(365*2)   ! 365*2 days long (2 rows/day), 24 hours by 10 minutes wide
+let aspect = `aspect*32/28` ! row gauge 28 sti, stitch gauge 32 sti
+
+set window/siz=2/asp=`aspect` 
+set view nomargin
+go margins .3 .3
+
+shade/pal=($palette)/lev=($levs)/vlim=2:22/title="Low and High Daily Temperature"/set mask1*tempmin2d
+  go unlabel ($labnum_dset)
+  ppl ylab "hours"
+ ppl shakey 1, 1, 0.08, , , , 0.2, 0.5, 0.8, 3.2
+ppl shade
+
+let mask2 = if yy2d ge daylen2d then 1
+shade/over/nolab/pal=($palette)/lev=($levs) mask2*tempmax2d
+
+annotate/norm/x=0.5/y=1.04/siz=0.1/halign=0 "Low and High Daily Temperature (Deg F) ($start_day)-`yr-1`:($start_day)-`yr`"
+
+! 144 sts, 730 rows
+
