@@ -12,7 +12,7 @@ cancel region
 set mode calendar:day
 
 set text/font=arial
-define view/axes/x=0:1/y=0:1 nomargin
+define view/axes/x=.02:1/y=0:1 nomargin
 
 let yr = $1%2021%
 define symbol start_day = $2%20-sep%
@@ -24,7 +24,7 @@ cancel view
 go ambient_aggregate.jnl
 
 let deld = 5/(24*60)  ! delta 5 minutes, units of a day
-define axis/t="1-jan-2020:00:00":"31-dec-2022:23:55":`deld`/units=days/t0="1-jan-2020:00:00"/edges time5
+define axis/t="1-jan-2020:00:00":"31-dec-2023:23:55":`deld`/units=days/t0="1-jan-2020:00:00"/edges time5
 set var/name=temp_in temperature
 let/like=temp_in temperature = temp_in[gt=time5]
 
@@ -55,12 +55,10 @@ if ($start_day%|1-jan>1|01-jan>1|*>0%) then \
 let/like=temperature/title="Daily Max Temp" day_temp_max = temp_max[t=@fav]
 let/like=temperature/title="Daily Min Temp" day_temp_min = temp_min[t=@fav]
 
-let/like=temperature/title="Daily Max Temp" day_temp_max = temp_max[gt=time5]
-let/like=temperature/title="Daily Min Temp" day_temp_min = temp_min[gt=time5]
+let tt = t[gt=tday]
 
 define ax/y=1:2:1/units=hours yax
 let yy = y[gy=yax]
-
 
 let tempmax2d = day_temp_max + 0*yy
 let tempmin2d = day_temp_min + 0*yy
@@ -84,7 +82,7 @@ define symbol levs = (-inf)(30,90,5)(inf)
 ! go margins .8 .8
 
 
-define axis/y=0:24:0.1/units=hours yax
+define axis/y=0:24/npoints=144/units=hours yax
 let yy = y[gy=yax]
 let yy2d = yy + 0*ll
 
@@ -97,8 +95,9 @@ let daylen2d = 24 - daylen+ 0*yy
 let mask1 = if yy2d lt daylen2d then 1
 
 
-let aspect = 24*6/(365*2)   ! 365*2 days long (2 rows/day), 24 hours by 10 minutes wide
-let aspect = `aspect*32/28` ! row gauge 28 sti, stitch gauge 32 sti
+let aspect = (24*6/7)/(365*2/10)	! 365*2 days long (2 rows/day), 24 hours by 10 minutes wide
+					! row gauge 10 row/inch, stitch gauge 7 stitch/inch
+
 
 set window/siz=2/asp=`aspect` 
 set view nomargin
@@ -107,13 +106,39 @@ go margins .3 .3
 shade/pal=($palette)/lev=($levs)/vlim=2:22/title="Low and High Daily Temperature"/set mask1*tempmin2d
   go unlabel ($labnum_dset)
   ppl ylab "hours"
- ppl shakey 1, 1, 0.08, , , , 0.2, 0.5, 0.8, 3.2
+ ppl shakey 1, 1, 0.08, , , , 0.5, 0.7, 0.8, 3.2
 ppl shade
 
 let mask2 = if yy2d ge daylen2d then 1
 shade/over/nolab/pal=($palette)/lev=($levs) mask2*tempmax2d
 
 annotate/norm/x=0.5/y=1.04/siz=0.1/halign=0 "Low and High Daily Temperature (Deg F) ($start_day)-`yr-1`:($start_day)-`yr`"
+frame/file=scarf_2022_2023.png
 
-! 144 sts, 730 rows
+! 144 stitches, 730 rows
+! 
+! < 30	Deep purple		Eggplant
+! 30-34	purple			French Lavendar
+! 35-39	blue-purple		Majestic
+! 40-44	blue			Jay
+! 45-49	med blue		Blue
+! 50-54	cyan			Cyan
+! 55-59	green			Spruce
+! 60-65	apple Ggreen		Macaw
+! 65-69	chartreuse		Limeade
+! 70-74	yellow			Canary
+! 75-79	lt orange		Kumquat
+! 80-84	red-orange		Orange
+! 85-89	red			Serrano
+! > 90	deep red		Garnet
+
+! Stitches across the row are one per 10 minutes for a total of 144
+let/title="# Night"/units="stitches" night_sts = INT((24-daylen)*6 + 0.5)
+let/title="# Day"/units="stitches" day_sts = INT(daylen*6 + 0.5)
+
+let/like=day_temp_min day_min = INT(day_temp_min + 0.5)
+let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
+
+list/prec=3/t=20-sep-`yr-1`:1-jan-`yr` night_sts, day_sts, day_min, day_max
+
 
