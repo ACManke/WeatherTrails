@@ -53,7 +53,7 @@ let lasty = `lasty_s`
 let ny = lasty - firsty + 1
 
 
-IF `ny gt 3` then
+IF `ny gt 7` then
    say Script needs more color definitions for `ny` years
    exit/script
 endif
@@ -122,24 +122,6 @@ define symbol plotstyle = ($plotstyle)/vlim=`ax_lo`:`ax_hi`
 define symbol plotstyle=($plotstyle)/thick=2
 define symbol plotstyle=($plotstyle)/step=connected 
 
-! All years in different colors. This is kind of a mess.
-
-! set view full
-! define symbol timerange = /t=($date1)-`firsty`:($date2)-`firsty`
-! IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`firsty-1`:($date2)-`firsty`
-! plot($plotstyle)/color=($color1)($timerange)/title="($plot_title)"/set var
-!    IF ($labnum_year"0|*>1") THEN go unlabel ($lab($labnum_year))
-!    ppl plot
-! 
-! let yr = firsty+1
-! repeat/range=2:`ny`/name=yy (\
-! define symbol yy = `yy`;\
-! set view full($yy);\
-! define symbol timerange = /t=($date1)-`yr`:($date2)-`yr`;\
-! IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`yr-1`:($date2)-`yr`;\
-! plot($plotstyle)/color=($color($yy))/axes=0,0,0,0/nolab($timerange) var;\
-! let yr = `yr + 1`)
-! 
 
 ! Plot daily rain for this year, date1 through date2
 
@@ -147,15 +129,15 @@ cancel view
 let tl = tt[L=@max]
 define symbol yy = `ny`
 define symbol thisyear = `tax_datestring(tl, tl, "year")`
-define symbol timerange = /t=($date1)-($thisyear):($date2)-($thisyear)
-IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`($thisyear)`:($date2)-($thisyear)
-plot($plotstyle)/color=($color($yy))($timerange)/title="($date1)-`($thisyear)`  to  ($date2)-($thisyear)"/set var
+define symbol timerange = ($date1)-($thisyear):($date2)-($thisyear)
+IF ($yrm"0") THEN define symbol timerange = ($date1)-`($thisyear)-1`:($date2)-`($thisyear)`
+plot($plotstyle)/color=($color($yy))/t=($timerange)/title="($timerange)"/set var
    IF ($labnum_year"0|*>1") THEN go unlabel ($lab($labnum_year))
    ppl plot
 
 annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather Recent `($var),return=title` Data"
 
-message Plotting data for ($date1)-`($thisyear)-1` to ($date2)-($thisyear).  Edit plot_rain.jnl to change the date range
+message Plotting data for ($timerange).  Edit plot_rain.jnl to change the date range
 cancel symbol yrm
 
 ! What's the overall min/max?  Use for the v-limits 
@@ -242,8 +224,8 @@ let color = strfloat(tax_datestring(tm, tm, "year")) - 2019
 
 plot/step=conn/nolab/color=black/vlim=`month_min`:`month_max`/title="month_rain Rain" month_rain
 
-
-go bar_chart3 poly/axes/over/nolab/fill/line/pal=($palette_name)/lev=(0.5,3.5,1) month_rain color
+define symbol levels = (0.5,`ny`.5,1)
+go bar_chart3 poly/axes/over/nolab/fill/line/pal=($palette_name)/lev=($levels) month_rain color
 annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "Monthly Rainfall"
 
 let tm = t[gt=month_rain]
