@@ -200,7 +200,7 @@ go month_rain `yr` ($color($yy));\
 let yr = `yr + 1`)
 
 IF ($reference) THEN
-   set view lower4
+   set view lower`ny+1`
    go margins 1.4 1 1.2 1.0
    use ($reference_data)
    plot/vlim=`ax_lo`:`month_max`/noax/($graystyle) rain
