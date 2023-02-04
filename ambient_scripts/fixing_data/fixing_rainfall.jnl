@@ -1,0 +1,26 @@
+
+! This data was missing about 0.4 inch of rain on January 12
+
+use data/ambient-weather-20230101-20230131.nc
+plot/t=12-jan-2023:13-jan-2023 hourly_rain, daily_rain
+list//t=12-jan-2023:13-jan-2023 hourly_rain, daily_rain
+set var/name=hourly_in hourly_rain
+set var/name=daily_in daily_rain
+
+let tt = t[gt=hourly_in]
+let t1 = tt[t="12-jan-2023:01:05:00"]
+let t2 = tt[t="12-jan-2023:04:05:00"]
+
+let mask = if tt ge t1 and tt le t2 then 0.12 else 0
+
+let/like=hourly_in hourly_rain =  hourly_in + mask
+let /like=daily_in daily_rain = hourly_rain[t=@rsum]/12
+save/append/file="data/ambient-weather-20230101-20230131.nc"/outtype=float/t="12-jan-2023:00:05:00":"12-jan-2023:23:55:00" hourly_rain, daily_rain
+
+
+cancel data/all
+cancel var/all
+use data/ambient-weather-20230101-20230131.nc
+set window/new
+plot/t=12-jan-2023:13-jan-2023 hourly_rain, daily_rain
+list/t=12-jan-2023:13-jan-2023 hourly_rain, daily_rain

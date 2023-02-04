@@ -1,0 +1,50 @@
+! The file indoor_dec22.dat is a listing from data/ambient-weather-20221201-20221231.nc
+! Edit it to reduce the spikes.
+
+
+cancel mode logo
+let day = ($1"1")
+let next = day+1
+
+let draw_line = 0
+if ($2"0") then
+ let line = ($2)
+ let draw_line = 1
+endif
+
+use data/ambient-weather-20221201-20221231.nc
+
+set win/siz=2/asp=0.8
+plot indoor_temperature; pause
+set view upper
+
+set v upper; plot/t=`day`-dec-2022:`next`-dec-2022/line/sym indoor_temperature
+if `draw_line gt 0` then plot/over/color=red/t=`day`-dec-2022:`next`-dec-2022 line + 0*indoor_temperature
+
+set v lower; plot/t="`day`-dec-2022:12:00":"`day`-dec-2022:17:00"/line/sym indoor_temperature
+if `draw_line gt 0` then plot/over/color=red/t=`day`-dec-2022:`next`-dec-2022 line + 0*indoor_temperature
+
+!!!!!!!!!!!!!!!!!!!!
+
+! exit/script
+
+!!!!!!!!!!!!!!!!!!!!
+
+
+! Here's how to read and plot the file indoor_dec22.dat. It's edited to remove header lines
+! and to change the format to a delimited format. Change DEC to 12, remove the : after
+! the record number (but not the : within the time of day) Also change - to / in the dates
+
+cancel data/all
+
+file/form=delim/delim="\b"/type="eurodate,time, num, num"/var="date, time, num, indoor" indoor_dec22.dat
+let datetime = date + time/24
+define axis/t/t0=1-jan-1900/units=days taxis = datetime
+
+let repaired = reshape(indoor[d=1], t[gt=taxis])
+set win/new/siz=2/asp=0.5
+
+use data/ambient-weather-20221201-20221231.nc
+
+plot/color=blue/thick/title="Original data (blue) and fixed (red)" indoor_temperature
+plot/over/color=red repaired

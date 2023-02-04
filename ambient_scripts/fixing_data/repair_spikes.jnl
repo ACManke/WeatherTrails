@@ -1,0 +1,47 @@
+! The file fixed_indoor_dec22.dat is a listing of indoor temperature from
+! data/ambient-weather-20221201-20221231.nc and data/ambient-weather-20221201-20221231.nc
+! and edited to reduce the spikes.
+
+
+! Here's how to read and plot the file fixed_indoor_dec22.dat. It's edited to remove header lines
+! and to change the format to a delimited format. Change DEC to 12, remove the : after
+! the record number (but not the : within the time of day). Also change - to / in the dates
+
+cancel data/all
+
+file/form=delim/delim="\b"/type="eurodate,time, num, num"/var="date, time, num, indoor" fixed_indoor_dec22.dat
+let datetime = date + time/24
+define axis/t/t0=1-jan-1900/units=days taxis = datetime
+
+let repaired = reshape(indoor[d=1], t[gt=taxis])
+set win/siz=2/asp=0.5
+
+! This file is from the original data, processed by ambient_convert.jnl
+! It contains the spikes.
+
+use data/orig.ambient-weather-20221201-20221231.nc
+
+plot/color=blue/title="Original data (blue) and fixed (red)" indoor_temperature
+plot/over/color=red repaired
+pause
+
+! Now will overwrite the corrected indoor_temperature data into 
+! data/ambient-weather-20221201-20221231.nc
+
+let/d=1/like=indoor_temperature[d=2] indoor_temperature = repaired
+save/clobber/file=new.nc indoor_temperature[d=1]
+
+cancel data/all
+cancel variable/all
+use new.nc
+
+save/append/outtype=float/file="data/ambient-weather-20221201-20221231.nc" indoor_temperature
+
+! Compare the original spikey data with the new unspiked data.
+cancel data/all
+use data/orig.ambient-weather-20221201-20221231.nc
+use data/ambient-weather-20221201-20221231.nc
+
+set window/new/siz=2/asp=0.5
+plot/color=blue indoor_temperature[d=1]
+plot/over/color=red indoor_temperature[d=2]
