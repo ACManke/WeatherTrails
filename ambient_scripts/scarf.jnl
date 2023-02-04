@@ -73,6 +73,26 @@ define symbol levs = (-inf)(30,90,5)(inf)
 ! define symbol levs = (-inf)(25,95,5)(inf)
 define symbol levs = (-inf)(25,90,5)(inf)
 
+! /LEV=15H for equal numbers of readings in each bin
+let do_15h = 0
+IF `do_15h` THEN
+   define axis/x=1:2:1 x2ax
+   let xx = x[gx=x2ax]
+   let x1mask = if xx eq 1 then 1 else 0
+   let x2mask = if xx eq 2 then 1 else 0
+   let min_and_max = day_temp_min * x1mask + day_temp_max* x2mask
+   shade/lev=15H/pal=rnb2 min_and_max
+
+   ! Use symbol ($lev_all) to define the levels
+   show symbol lev_all
+   define symbol levs = (12.2),(34),(37.5),(40.2),(42.1),(44.8),(46.8),(49),(51.1),(52.9),(55),(56.8),(60.1),(66.6),(74.6),(92.6)
+   
+   pause
+   plot/step=connected {12.2,34,37.55,40.2,42.1,44.8,46.85,49,51.1,52.9,55,56.8,60.15,66.65,74.65,92.6}
+   pause
+   set window/new
+ENDIF
+
 ! set window/siz=2
 ! set view upper
 ! go margins .8 .8
@@ -174,30 +194,31 @@ let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 
 list/prec=3/clobber/file=knitting.dat/t=20-sep-`yr-1`:1-jan-`yr` night_sts, day_sts, day_min, day_max
 
-
-message hit return to go on and do histograms
-
-set window/new/asp=0.5
-set view left
-go frequency_histogram2 day_max[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
-say
-say "Frequency Histogram for Daily High Temperatures 2021-2022"
-list/norow yboxlo[gy=bar_expr], yboxhi[gy=bar_expr], bar_expr
-let high_bar = bar_expr
-save/clobber/file=histogram.nc high_bar
-say
-
-set view right
-go frequency_histogram2 day_min[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
-say
-say "Frequency Histogram for Daily Low Temperatures 2021-2022"
-list/norow yboxlo[gy=bar_expr], yboxhi[gy=bar_expr], bar_expr
-let low_bar = bar_expr
-save/append/file=histogram.nc low_bar
-say
-pause
-cancel var low_bar, high_bar
-
-use histogram.nc
-show dat
-list/norow yboxlo[gy=high_bar], yboxhi[gy=high_bar], low_bar, high_bar
+!  
+!  message hit return to go on and do histograms
+!  
+!  set window/new/asp=0.5
+!  set view left
+!  go frequency_histogram2 day_max[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
+!  say
+!  say "Frequency Histogram for Daily High Temperatures 2021-2022"
+!  list/norow yboxlo[gy=bar_expr], yboxhi[gy=bar_expr], bar_expr
+!  let high_bar = bar_expr
+!  save/clobber/file=histogram.nc high_bar
+!  say
+!  
+!  set view right
+!  go frequency_histogram2 day_min[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
+!  say
+!  say "Frequency Histogram for Daily Low Temperatures 2021-2022"
+!  list/norow yboxlo[gy=bar_expr], yboxhi[gy=bar_expr], bar_expr
+!  let low_bar = bar_expr
+!  save/append/file=histogram.nc low_bar
+!  say
+!  pause
+!  cancel var low_bar, high_bar
+!  
+!  use histogram.nc
+!  show dat
+!  list/norow yboxlo[gy=high_bar], yboxhi[gy=high_bar], low_bar, high_bar
+!  
