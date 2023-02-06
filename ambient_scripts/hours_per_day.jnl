@@ -1,0 +1,71 @@
+! https://web.archive.org/web/20180128172128/http://mathforum.org/library/drmath/view/56478.html
+! 
+!   D = daylength
+!   L = latitude
+!   J = day of the year
+!
+!  P = asin[.39795*cos(.2163108 + 2*atan{.9671396*tan[.0086(J-186)]})]
+!
+!                          _                                         _
+!                         / sin(0.8333*pi/180) + sin(L*pi/180)*sin(P) \
+!   D = 24 - (24/pi)*acos{  -----------------------------------------  }
+!                         \_          cos(L*pi/180)*cos(P)           _/
+!
+
+! Compare the plot at several locations. No argument or 0 to do just Clinton
+
+define symbol all = ($1"0|0|*>1") 
+define symbol plotit = ($2"1|0|*>1")
+
+define axis/t0=1-jan-0000/t=0:366:1/edges/units=day/modulo ldays
+define axis/t=1:`365*2`:1/units=days/modulo Ldays
+
+let LL = L[gt=Ldays]
+
+let pi = 3.1415926
+let lat = 47.9784  ! clinton wa
+
+let p = asin(.39795*cos(.2163108 + 2*atan(.9671396*tan(.0086*(LL-186)))))
+
+let d1 = sin(0.8333*pi/180) + sin(lat*pi/180)*sin(P) 
+let d2 = cos(lat*pi/180)*cos(P) 
+let/units=hours/title="Hours of daylight" daylen = 24 - 24/pi * acos(d1/ d2)
+
+! Exit if this is called from another script that just needs daylen to be defined.
+if `($plotit) eq 0` then exit/script
+
+! Plot the curve
+
+! for labels
+let range = daylen[t=@max] - daylen[t=@min]
+
+define symbol quals = /t=1:365
+define symbol quals = /t=268:`365+268`
+if ($all"0") then define symbol quals = ($quals)/vlim=4:20
+
+
+set text/font=sans
+plot/thick/color=blue($quals) daylen 
+set text/color=blue move
+annotate/norm/x=0/y=1.05/siz=0.1 "Blue: Clinton 47.98N, max - min `range,p=2` hours"
+
+if `($all) eq 0` then exit/script
+pause
+let lat = 21.31 ! Honolulu
+plot/thick/over/color=red($quals)/vlim=4:22 daylen
+set text/color=red move
+annotate/norm/x=0/y=1.1/siz=0.1 "Red: Honolulu 21.3N, max - min `range,p=2` hours"
+
+
+pause
+let lat = 61.22  ! Anchorage
+plot/thick/over/color=(0, 50, 40)($quals)/vlim=4:22 daylen
+set text/color=(0, 50, 40) move
+annotate/norm/x=0/y=1.15/siz=0.1 "Green: Anchorage 61.2N, max - min `range,p=2` hours"
+
+pause
+let lat = -39.3  ! Cape Town
+plot/thick/over/color=(50,10,90)($quals)/vlim=4:22 daylen
+set text/color=(50,10,90) move
+annotate/norm/x=0/y=1.2/siz=0.1 "Purple: Cape Town 33.9S, max - min `range,p=2` hours"
+
