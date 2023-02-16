@@ -10,31 +10,31 @@ cancel symbol/all
 set text/font=arial
 
 ! If we've drawn other plots, open a new plot window
-IF ($win_title"0|*>1") THEN 
+if ($win_title"0|*>1") then 
    set window/new/aspect=0.5/size=2
-ELSE
+else
    set window/aspect=0.5/size=2
-ENDIF
+endif
 
 
-DEFINE SYMBOL reference = 0
-IF ($1"0|0|1|2|*>1") THEN 
-   DEFINE SYMBOL reference = ($1)
-   IF ($reference"0|1|*>0") THEN
-      DEFINE SYMBOL reference_data = data/everett_climatology.nc
-      DEFINE SYMBOL reference_title = Paine Field
-      DEFINE SYMBOL reference_name = Paine
-   ENDIF
-   IF ($reference"0|2>1|*>0") THEN
-      DEFINE SYMBOL reference_data = data/seattle_climatology.nc
-      DEFINE SYMBOL reference_title = Seattle 
-      DEFINE SYMBOL reference_name = Seattle 
-   ENDIF
+define symbol reference = 0
+if ($1"0|0|1|2|*>1") then 
+   define symbol reference = ($1)
+   if ($reference"0|1|*>0") then
+      define symbol reference_data = data/everett_climatology.nc
+      define symbol reference_title = Paine Field
+      define symbol reference_name = Paine
+   endif
+   if ($reference"0|2>1|*>0") then
+      define symbol reference_data = data/seattle_climatology.nc
+      define symbol reference_title = Seattle 
+      define symbol reference_name = Seattle 
+   endif
 
    !  Plot style for overlaying monthly reference data
    define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.03,0.03,0.03,0.03)
 
-ENDIF
+endif
 
 cancel data/all
 
@@ -94,22 +94,26 @@ let/like=hourly_rain var = day_rain	! used in color_labels.jnl
 define symbol var_title = Daily Rain
 
 ! variable to plot
-let/like=day_rain var = day_rain[L=@SBX:5]
 
-let/like=day_rain var = day_rain[L=@SBX:5]  ! *****
+define symbol smoothing = 5
+
+let/like=day_rain var = day_rain[L=@SBX:($smoothing)]
 
 ! Plotting a subset of the year - a few months before the current date
 ! To set particular dates, set date1 and date2 below call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
 ! color_labels also sets the dax_lo, dax_hi, min and max of data in this date range
 
-DEFINE SYMBOL date1 = 01-Jan
-DEFINE SYMBOL date2 = 31-Dec
+define symbol date1 = 01-jan
+define symbol date2 = 31-Dec
 GO date_range
 GO color_labels ($date1) ($date2)
 
-define symbol plot_title = ($var_title), 5-day smoothed  <NL> ($color_label)
 define symbol plot_title = ($var_title)<NL> ($color_label)  ! *****
+IF `($smoothing) GT 1` THEN 
+ define symbol plot_title = ($var_title), 5-day smoothed  <NL> ($color_label)
+ define symbol smooth_title = , 5-day smoothed
+endif
 
 ! plot range for this subset of dates. Handle case of small amount of rainfall.
 let ax_lo = -0.002
@@ -120,22 +124,34 @@ define symbol plotstyle = ($plotstyle)/vlim=`ax_lo`:`ax_hi`
 
 ! Set the plot-style
 define symbol plotstyle=($plotstyle)/thick=2
-define symbol plotstyle=($plotstyle)/step=connected 
+! define symbol plotstyle=($plotstyle)/step=connected 
 
+IF `($smoothing) GT 1` THEN define symbol plot_title = ($var_title), ($smoothing)-day smoothed  <NL> ($color_label)
 
 ! Plot daily rain for this year, date1 through date2
 
 cancel view
-let tl = tt[L=@max]
-define symbol yy = `ny`
-define symbol thisyear = `tax_datestring(tl, tl, "year")`
-define symbol timerange = ($date1)-($thisyear):($date2)-($thisyear)
-IF ($yrm"0") THEN define symbol timerange = ($date1)-`($thisyear)-1`:($date2)-`($thisyear)`
-plot($plotstyle)/color=($color($yy))/t=($timerange)/title="($timerange)"/set var
-   IF ($labnum_year"0|*>1") THEN go unlabel ($lab($labnum_year))
-   ppl plot
+set view full
+
+define symbol timerange = /t=($date1)-`firsty`:($date2)-`firsty`
+IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`firsty-1`:($date2)-`firsty`
+plot($plotstyle)/color=($color1)($timerange)/title="($plot_title)"/set var
+go unlabel ($lab($labnum_year))
+ppl plot
+
+
+let yr = firsty+1
+
+repeat/range=2:`ny`/name=yy (\
+ define symbol yy = `yy`;\
+ set view full($yy);\
+ define symbol timerange = /t=($date1)-`yr`:($date2)-`yr`;\
+ IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`yr-1`:($date2)-`yr`;\
+ plot($plotstyle)/color=($color($yy))/axes=0,0,0,0/nolab($timerange) var;\
+ let yr = `yr + 1`)
 
 annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather Recent `($var),return=title` Data"
+
 
 message Plotting data for ($timerange).  Edit plot_rain.jnl to change the date range
 cancel symbol yrm
@@ -319,4 +335,55 @@ endif
 set view full
 plot/noax/nolab/hlim=100:200/i=1:3 i
 annotate/norm/x=0.5/y=-0.17/siz=0.12/halign=0 "($year_sums)"
+
+
+
+! -------------- List monthly data --------------
+
+let tm = t[gt=monthly]
+let modate = TAX_DATESTRING(tm, tm, "month")
+
+define symbol var_title = Monthly Average `($var),return=title`
+
+
+IF ($reference) THEN
+
+   use data/everett_climatology.nc
+   use data/seattle_climatology.nc
+
+   set data 1
+
+   let m1 = 1
+   let yr = firsty
+   cancel symbol comma
+   cancel symbol varlist
+
+   repeat/range=1:`ny`/name=yy (\
+   let/title="Ambient ($var_title) `yr`" c`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)c`yr`;\
+   define symbol comma = , ;\
+   let m1 = `m1+12`;\
+   let yr = `yr+1`)
+
+   let/like=rain[d=2] Everett = rain[d=2]
+   let/like=rain[d=3] Seattle = rain[d=3]
+
+   list ($varlist), Everett, Seattle
+
+else
+
+   let m1 = 1
+   let yr = firsty
+   cancel symbol comma
+   cancel symbol varlist
+
+   repeat/range=1:`ny`/name=yy (\
+   let/title="Ambient ($var_title) `yr`" c`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)c`yr`;\
+   define symbol comma = ,;\
+   let m1 = `m1+12`;\
+   let yr = `yr+1`)
+   list ($varlist)
+
+endif
 
