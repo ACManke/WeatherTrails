@@ -124,13 +124,14 @@ let aspect = (24*6/7)/(365*2/10)	! 365*2 days long (2 rows/day), 24 hours by 10 
 
 
 set window/siz=2/asp=`aspect` 
-set view nomargin
-go margins .3 .3
+! set view nomargin
+set view full
+go margins .6 .6
 
 shade/pal=($palette)/lev=($levs)/vlim=2:22/title="Low and High Daily Temperature"/set mask1*tempmin2d
   go unlabel ($labnum_dset)
   ppl ylab "hours"
- ppl shakey 1, 1, 0.08, , , , 0.5, 0.7, 0.8, 3.2
+! ppl shakey 1, 1, 0.08, , , , 0.5, 0.7, 0.8, 3.2
 ppl shade
 
 let mask2 = if yy2d ge daylen2d then 1
