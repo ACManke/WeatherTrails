@@ -3,12 +3,13 @@
 
 ! If we've drawn other plots, open a new plot window
 IF ($win_title"0|*>1") THEN 
-   set window/new/aspect=0.5/size=2
+   set window/new/aspect=0.5/size=2; go ptest; cancel view
 ELSE
-   set window/aspect=0.5/size=2
+   set window/aspect=0.5/size=2; go ptest; cancel view
 ENDIF
 
 define symbol trans_title = ($trans"|max>High|min>Low")
+
 ! Daily axis. Start 2 months before the start of the first year, to 
 ! allow for the plot of each years data overlaid, in the month-range of 
 ! the most recent 3 months of data.
@@ -18,6 +19,19 @@ define axis/t=1-nov-`firsty-1`:1-jan-`lasty+1`:1/edges/units=days tday
 let/like=($var)/title="`($var),return=title` ($trans)" ($var)_day_($trans) = ($var)[gt=tday@($trans)]
 
 define symbol var_title = Daily ($trans_title) `($var),return=title`
+
+
+IF ($temp_diff"0|*>1") THEN
+   
+   let day_min = ($var)[gt=tday@min]
+   let day_max = ($var)[gt=tday@max]
+   let/like=($var)/title="`($var),return=title` day max-min" ($var)_day_diff = day_max - day_min
+   define symbol var_title = Daily max-min `($var),return=title`
+   define symbol trans = diff
+   define symbol trans_title = High-Low
+
+ENDIF
+
 
 !  Plot style for overlaying monthly reference data
 if `($reference)` then\   
@@ -29,11 +43,12 @@ if `($reference)` then\
 ! To set particular dates, set date1 and date2 below call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
 
-DEFINE SYMBOL smoothing = 1
-DEFINE SYMBOL yrm = 1
+define symbol smoothing = 1
+if ($trans"0|diff>1|*>0") then define symbol smoothing = 5
+define symbol yrm = 1
 
-DEFINE SYMBOL date1 = 01-Jan
-DEFINE SYMBOL date2 = 31-Dec
+define symbol date1 = 01-Jan
+define symbol date2 = 31-Dec
 GO date_range
 
 ! variable to plot and plot-style.
@@ -136,64 +151,70 @@ go color_labels 01-Jan 31-Dec
 ! ---------------------------------------------------------------------
 !  Monthly Maximum or Minimum 
 
-set window/new/size=2/aspect=1
 define symbol units = `($var),return=units`
-
-
-define symbol plot_annotation = ($trans_title)est `($var),return=title` (($units))
-
-
-let/units="($units)" ($var)_month_($trans) =  ($var)_day_($trans)[gt=tmonth@($trans)]
-let/units="($units)" month_temp =  if ($var)_month_($trans) then ($var)_month_($trans) else 0
-
-let mm = L[gt=month_temp]
-let color = INT( (mm-1)/12) + 1
-
 let ax_add = 4
 IF `strindex(upcase("($units)"), "INCH") GT 0` THEN let ax_add = 1
-
-let ax_lo = INT(($var)_month_($trans)[t=@min]) - ax_add
-let ax_hi = INT(($var)_month_($trans)[t=@max]) + ax_add
-
-IF `STRINDEX("($var)", "rain") GT 0` THEN LET ax_lo = 0
-
-set view upper
-plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_temp
-
-! Draw a bar-chart showing monthly data
-
+   
 let lev_hi = ny + 0.5
-go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_temp color
-annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
 
-set view lower
+! if its a max-min diff plot do not do monthly overall max or min
 
-define symbol plot_title = ($color_label)
-define symbol plot_style = /nolab/step=connected/vlim=`ax_lo`:`ax_hi`/line/thick/nokey
+IF ($trans"0|diff>0|*>1") THEN
 
-plot/color=($color1)/($plot_style)/title="($plot_title)"/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
-plot/nolab/nokey/over/thick/color=($color1)/sym=26/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
-
-
-let yr = firsty + 1
-cancel symbol yearlab
-
-repeat/range=2:`ny`/name=yy (\
- define symbol yy = `yy`;\
- set view lower($yy);\
- plot/nolab/axes=0,0,0,0($plot_style)/color=($color($yy))/lev=(0.5,`lev_hi`,1)/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
- plot/nolab/nokey/over/thick/color=($color($yy))/sym=26/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
- let yr = `yr + 1`)
-
-IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
-annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
-annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
-
-annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
+   set window/new/size=2/aspect=1; go ptest; cancel view
+   
+   define symbol plot_annotation = ($trans_title)est `($var),return=title` (($units))
+   
+   
+   let/units="($units)" ($var)_month_($trans) =  ($var)_day_($trans)[gt=tmonth@($trans)]
+   let/units="($units)" month_var =  if ($var)_month_($trans) then ($var)_month_($trans) else 0
+   
+   let mm = L[gt=month_var]
+   let color = INT( (mm-1)/12) + 1
+   
+   let ax_lo = INT(($var)_month_($trans)[t=@min]) - ax_add
+   let ax_hi = INT(($var)_month_($trans)[t=@max]) + ax_add
+   
+   IF `STRINDEX("($var)", "rain") GT 0` THEN LET ax_lo = 0
+   
+   set view upper
+   plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_var
+   
+   ! Draw a bar-chart showing monthly data
+   
+   go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_var color
+   annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
+   
+   set view lower
+   
+   define symbol plot_title = ($color_label)
+   define symbol plot_style = /nolab/step=connected/vlim=`ax_lo`:`ax_hi`/line/thick/nokey
+   
+   plot/color=($color1)/($plot_style)/title="($plot_title)"/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
+   plot/nolab/nokey/over/thick/color=($color1)/sym=26/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
+   
+   
+   let yr = firsty + 1
+   cancel symbol yearlab
+   
+   repeat/range=2:`ny`/name=yy (\
+    define symbol yy = `yy`;\
+    set view lower($yy);\
+    plot/nolab/axes=0,0,0,0($plot_style)/color=($color($yy))/lev=(0.5,`lev_hi`,1)/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
+    plot/nolab/nokey/over/thick/color=($color($yy))/sym=26/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
+    let yr = `yr + 1`)
+   
+   IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
+   annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
+   annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
+   
+   annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
+   
+endif  ! if its a max-min diff plot do not do monthly overall max or min
 
 ! ---------------------------------------------------------------------
 message now average monthly
-set window/new/title="Average ($var)"/size=2/aspect=1
+set window/new/title="Average ($var)"/size=2/aspect=1; go ptest; cancel view
 
 
 !  Monthly Average high/low
@@ -201,17 +222,19 @@ set window/new/title="Average ($var)"/size=2/aspect=1
 define symbol plot_annotation = Monthly Average ($trans_title) `($var),return=title` (($units))
 
 let/units="($units)"  ($var)_month_ave_($trans) =  ($var)_day_($trans)[gt=tmonth@ave]
-let/units="($units)" month_temp =  if ($var)_month_ave_($trans) then ($var)_month_ave_($trans) else 0
+let/units="($units)" month_var =  if ($var)_month_ave_($trans) then ($var)_month_ave_($trans) else 0
 
+let mm = L[gt=month_var]
+let color = INT( (mm-1)/12) + 1
 
 let ax_lo = INT(($var)_month_ave_($trans)[t=@min]) - ax_add
 let ax_hi = INT(($var)_month_ave_($trans)[t=@max]) + ax_add
 
 set view upper
-plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_temp
+plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_var
 
 ! Draw a bar-chart showing monthly
-go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_temp color
+go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_var color
 
 annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "($plot_annotation)"
 
@@ -219,9 +242,12 @@ if `($reference)` then
    use ($reference_data)
    if ($trans"0|max>1|*>0") then 
       plot/over($graystyle) temp_hi[gt=tmonth]
-   elif ($trans"0|min>1|*>0") THEN
+   elif ($trans"0|min>1|*>0") then
       plot/over($graystyle) temp_lo[gt=tmonth]
+   elif ($trans"0|diff>1|*>0") then
+      plot/over($graystyle) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
    endif
+
    annotate/norm/x=0/y=1.4/siz=0.12 "Gray: ($reference_title) Monthly Average"
 
    cancel data ($reference_data)
@@ -260,8 +286,10 @@ if `($reference)` then
    use ($reference_data)
    if ($trans"0|max>1|*>0") then 
       plot/over($graystyle) temp_hi[gt=tmonth]
-   else
+   elif ($trans"0|min>1|*>0") then
       plot/over($graystyle) temp_lo[gt=tmonth]
+   elif ($trans"0|diff>1|*>0") then
+      plot/over($graystyle) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
    endif
    cancel data ($reference_data)
 
@@ -289,9 +317,12 @@ IF ($reference) THEN
    if ($trans"0|max>1|*>0") THEN 
       define symbol hilo_var = temp_hi
       define symbol hilo_lab = High
-   else
+   elif ($trans"0|min>1|*>0") then
       define symbol hilo_var = temp_lo
       define symbol hilo_lab = Low
+   elif ($trans"0|diff>1|*>0") then
+      define symbol hilo_var = temp_hi-temp_lo
+      define symbol hilo_lab = Temp Diff
    endif
 
    use data/everett_climatology.nc
@@ -311,8 +342,13 @@ IF ($reference) THEN
    let m1 = `m1+12`;\
    let yr = `yr+1`)
 
-   let/like=($hilo_var)[d=2] Everett = ($hilo_var)[d=2]
-   let/like=($hilo_var)[d=3] Seattle = ($hilo_var)[d=3]
+   if ($trans"0|diff>1|*>0") then
+      let/like=($var) Everett = temp_hi[d=2]-temp_lo[d=2]
+      let/like=($var) Seattle = temp_hi[d=3]-temp_lo[d=3]
+   else
+      let/like=($hilo_var)[d=2] Everett = ($hilo_var)[d=2]
+      let/like=($hilo_var)[d=3] Seattle = ($hilo_var)[d=3]
+   endif
    list ($varlist), Everett, Seattle
 
 else
