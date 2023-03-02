@@ -295,8 +295,8 @@ if `($reference)` then
 
 elif ($var"|temperature>1|TEMPERATURE>1|*>0") then
 
-   say To see Everett or Seattle average monthly min temp with temp plots,
-   say add 3rd argument 1 for Everett or 2 for Seattle
+   say To see Paine Field or Seatac average monthly min temp with temp plots,
+   say add 3rd argument 1 for Paine Field or 2 for Seatac
 
 endif
 
@@ -312,7 +312,8 @@ let modate = TAX_DATESTRING(tm, tm, "month")
 define symbol var_title = Monthly Average `($var),return=title`
 
 
-IF ($reference) THEN
+   use data/everett_climatology.nc
+   use data/seattle_climatology.nc
 
    if ($trans"0|max>1|*>0") THEN 
       define symbol hilo_var = temp_hi
@@ -325,8 +326,7 @@ IF ($reference) THEN
       define symbol hilo_lab = Temp Diff
    endif
 
-   use data/everett_climatology.nc
-   use data/seattle_climatology.nc
+   use ($reference_data)
 
    set data 1
 
@@ -343,13 +343,13 @@ IF ($reference) THEN
    let yr = `yr+1`)
 
    if ($trans"0|diff>1|*>0") then
-      let/like=($var) Everett = temp_hi[d=2]-temp_lo[d=2]
-      let/like=($var) Seattle = temp_hi[d=3]-temp_lo[d=3]
+      let/like=($var) Paine = temp_hi[d=2]-temp_lo[d=2]
+      let/like=($var) Seatac = temp_hi[d=3]-temp_lo[d=3]
    else
-      let/like=($hilo_var)[d=2] Everett = ($hilo_var)[d=2]
-      let/like=($hilo_var)[d=3] Seattle = ($hilo_var)[d=3]
+      let/like=($hilo_var)[d=2] Paine = ($hilo_var)[d=2]
+      let/like=($hilo_var)[d=3] Seatac = ($hilo_var)[d=3]
    endif
-   list ($varlist), Everett, Seattle
+   list ($varlist), Paine, Seatac
 
 else
 

@@ -10,7 +10,7 @@
 ! Arguments are 
 ! 1) var_name -- send in "diff" to plot the max-min temperature data
 ! 2) transformation max or min -- if var name is diff this is ignored
-! 3) 1 to show Everett avgs on plots, or 2 to show Seattle avgs 
+! 3) 1 to show Paine Field avgs on plots, or 2 to show Seatac avgs 
 !
 go ptest; cancel view
 
@@ -31,7 +31,7 @@ IF `($1"0|0|*>1") EQ 0` THEN
    say Arguments are 
    say   1) var_name 
    say   2) transformation max or min 
-   say   3) (optional) 1 to show Everett avgs on plots, or 2 to show Seattle avgs
+   say   3) (optional) 1 to show Paine Field avgs on plots, or 2 to show Seatac avgs
    say
    SHOW DATA
    say
@@ -54,18 +54,18 @@ IF ($3"0|0|1|2>1|*>1") THEN
    DEFINE SYMBOL reference = ($3)
    IF ($reference"0|1|*>0") THEN
       DEFINE SYMBOL reference_data = data/everett_climatology.nc
-      DEFINE SYMBOL reference_title = Everett
+      DEFINE SYMBOL reference_title = Paine Field
    ELIF ($reference"0|2>1|*>0") THEN
       DEFINE SYMBOL reference_data = data/seattle_climatology.nc
-      DEFINE SYMBOL reference_title = Seattle 
+      DEFINE SYMBOL reference_title = Seatac 
    ELSE
-      say Argument 3 may be 1 to show Everett averages or 2 to show Seattle averages. Ignoring.
+      say Argument 3 may be 1 to show Paine Field averages or 2 to show Seatac averages. Ignoring.
       DEFINE SYMBOL reference = 0
    ENDIF
 
    IF `($reference) GT 0 AND (($var"|temperature>1|diff>1|daily_rain>1|*>0") EQ 0)` THEN
       say
-      say Everett or Seattle data plotted with Temperature, Temperature-difference or Daily_Rain only
+      say Paine Field or Seatac data plotted with Temperature, Temperature-difference or Daily_Rain only
       say Ignoring reference-data setting for ($var)
       DEFINE SYMBOL reference = 0
       say
