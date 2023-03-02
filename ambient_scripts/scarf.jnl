@@ -195,33 +195,7 @@ let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 
 list/prec=3/clobber/file=knitting.dat/t=20-sep-`yr-1`:1-jan-`yr` night_sts, day_sts, day_min, day_max
 
-! 
-message uncomment commands at the end of scarf.jnl to go on and do histograms
-!  
-!  set window/new/asp=0.5
-!  
-!  set view left
-!  go frequency_histogram2 day_min[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
-!  annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.12 \
-!    "Frequency Histogram for Daily low Temperatures `yr-1`-`yr` "
-! 
-!  let low_cnt = bar_expr
-!  save/clobber/file=histogram.nc low_cnt
-!  say
-! 
-!  set view right
-!  go frequency_histogram2 day_max[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
-!  annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.12 \
-!    "Frequency Histogram for Daily High Temperatures `yr-1`-`yr` "
-!  say
-!  let high_cnt = bar_expr
-!  save/append/file=histogram.nc high_cnt
-! 
-!  cancel variable low_cnt, high_cnt
-!  
-!  use histogram.nc
-!  say "Frequency Histogram data for Daily Temperatures `yr-1`-`yr` "
-!  say
-!  list/norow yboxlo[gy=high_cnt], yboxhi[gy=high_cnt], low_cnt, high_cnt
-!  
-! 
+say Optionally run the script ambient_histogram.jnl to make histograms of the low and high day data
+
+say
+say Or in a new session, run temp_rnb_barcharts.jnl

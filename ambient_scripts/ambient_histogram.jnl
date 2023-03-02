@@ -1,0 +1,34 @@
+! histogram.jnl
+! Run this after scarf.jnl - uses defined variables day_min, day_max
+!  
+set window/new/asp=0.5
+
+set view left
+go frequency_histogram2 day_min[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
+annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.12 \
+  "Frequency Histogram for Daily low Temperatures `yr-1`-`yr` "
+
+let low_cnt = bar_expr
+save/clobber/file=histogram.nc low_cnt
+say
+
+set view right
+go frequency_histogram2 day_max[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
+annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.12 \
+  "Frequency Histogram for Daily High Temperatures `yr-1`-`yr` "
+say
+let high_cnt = bar_expr
+save/append/file=histogram.nc high_cnt
+
+cancel variable low_cnt, high_cnt
+
+use histogram.nc
+say "Frequency Histogram data for Daily Temperatures `yr-1`-`yr` "
+let sum = low_cnt+high_cnt
+say
+list/norow yboxlo[gy=high_cnt], yboxhi[gy=high_cnt], low_cnt, high_cnt, sum
+
+let bar_expr = sum
+go bar_chart2 plot/color=blue sum y " "
+
+go/help bar_chart1.jnl

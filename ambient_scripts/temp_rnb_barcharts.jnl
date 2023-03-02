@@ -1,7 +1,9 @@
 ! Define daily max and min temperature variables 
 
 go ambient_aggregate.jnl
-palette rnb2
+palette rnb3
+
+define symbol timerange = ($1"1-jan-2021:31-dec-2021")
 
 let tt = t[gt=temperature]
 
@@ -23,14 +25,12 @@ let/like=temperature/title="Daily Min Temp" day_temp_min = temperature[gt=tday@m
 show var day*
 
 set win/asp=.5/siz=2
-! go frequency_histogram2 day_temp_max[t=1-jan-2021:31-dec-2021] 22.5 107.5 5  " " " " 1
-go frequency_histogram2 day_temp_max[t=1-jan-2021:31-dec-2021] 25 100 5  " " " " 1
-! go frequency_histogram2 day_temp_max[t=1-jan-2021:31-dec-2021] 20 100 10  " " " " 1
+go frequency_histogram2 day_temp_max[t=($timerange)] 12.5 97.5 5  " " " " 1
 let yy = y[gy=wt_count]
 list wt_count, yy
 
 go bar_chart3 poly/line/nolabel/fill/lev=15 wt_count yy
-annotate/norm/x=0.5/y=-0.2/halign=0 "Frequency, Maximum Daily Temperature 2021"
+annotate/norm/x=0.5/y=-0.2/halign=0 "Frequency, Maximum Daily Temperature ($timerange)"
 
 say set win/new/asp=0.5/siz=2
 say go bar_chart3 poly/line/nolabel/fill/lev=15/palette=myfile2 wt_count yy
@@ -40,10 +40,10 @@ say go bar_chart3 poly/line/nolabel/fill/lev=15/palette=myfile2 wt_count yy
 exit/script
  
 set win/new/asp=.5/siz=2
-go frequency_histogram2 day_temp_min[t=1-jan-2021:31-dec-2021] 12.5 82.5 5 " " " " 1
+go frequency_histogram2 day_temp_min[t=($timerange)] 22.5 92.5 5 " " " " 1
 go bar_chart3 poly/line/nolabel/fill wt_count yy
 
-annotate/norm/x=0.5/y=-0.2/halign=0 "Frequency, Minimum Daily Temperature 2021"
+annotate/norm/x=0.5/y=-0.2/halign=0 "Frequency, Minimum Daily Temperature ($timerange)"
 list wt_count
 
 say using rnb2: 
