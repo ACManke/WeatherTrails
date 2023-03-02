@@ -221,7 +221,7 @@ IF ($reference) THEN
    use ($reference_data)
    plot/vlim=`ax_lo`:`month_max`/noax/($graystyle) rain
    set data 1
-
+ENDIF
 annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "Monthly Rain Accumulation <NL> ($color_label)"
 
 ! Block out the year labels
@@ -332,8 +332,6 @@ else
 
    say To see Paine Field or Seatac average month_rain rainfall with these plots:
    say GO plot_rain 1      or   GO plot_rain 2
-
-let yr = firsty
 
 endif
 

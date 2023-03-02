@@ -311,7 +311,7 @@ let modate = TAX_DATESTRING(tm, tm, "month")
 
 define symbol var_title = Monthly Average `($var),return=title`
 
-
+if ($reference) then
    use data/everett_climatology.nc
    use data/seattle_climatology.nc
 
