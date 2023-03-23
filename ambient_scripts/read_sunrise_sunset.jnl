@@ -85,8 +85,17 @@ say `nd` ; say `nds`! ; pause
 let var = dec
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
 let nds = `nds + nd`
-say `nd` ; say `nds`! ; pause
+say `nd` ; say `nds` ; pause
 
+list /i=1:`nd` daylen; pause
+
+! Now add one more day so there are 366, so that leap years are long enough.
+! This is not accurate but is fine, for the detail needed for the scarf project
+list/append/norow/nohead/file=noaa_day_length_($yr).dat daylen[i=`nd`]
+let nds = `nds + 1`
+say `nd` ; say `nds` ; pause
+
+list daylen[i=`nd`]; pause
 
 !  Now write the whole thing to a file, with dates 2020 - 2023 so
 !  it will be compatible with the time axis in scarf.jnl
@@ -98,7 +107,8 @@ define axis/t=1-jan-2020:1-jan-2021:1/edges/units=days tday
 define grid/t=tday tgrid
 file/skip=3/var="len"/grid=tgrid noaa_day_length_($yr).dat
 
-sh dat! ; pause
+show axis tday
+sh dat ; pause
 
 let/units=hours/title="day length" noaa_len = reshape(len, t[gt=tday])
 save/clobber/bounds/file=noaa_len_($yr).nc noaa_len
