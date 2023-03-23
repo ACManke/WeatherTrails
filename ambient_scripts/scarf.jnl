@@ -110,7 +110,16 @@ define axis/y=0:24/npoints=144/units=hours yax
 let yy = y[gy=yax]
 let yy2d = yy + 0*ll
 
-go hours_per_day 0 0
+
+! Use NOAA day-length.
+set mode ver
+
+use data/noaa_len_2023.nc
+set data 1
+
+let daylen = noaa_len[d=2]
+let tt = t[gt=daylen]
+
 let ll  = (tt - `tt[L=1]`)  ! axis of the temperature data
 
 let yy2d = yy + 0*ll
@@ -176,16 +185,8 @@ let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 ! Make a list to use for knitting.  1st Sept-Dec 2022, night length, day length
 !  in stitches, then the night and day temperatures
 ! 
-! Use NOAA day-length.
 
-IF `yr eq 23` then
-   use data/noaa_len_2023.nc
-else   ! whatever...
-   use data/noaa_len_2022.nc
-endif
-
-let/like=noaa_len len = noaa_len[d=2,gt=daylen]
-set data 1
+let/like=noaa_len[d=2] len = noaa_len[d=2,gt=tday]
 
 let/title="# Night"/units="stitches" night_sts = INT((24-len[d=2])*6 + 0.5)
 let/title="# Day"/units="stitches" day_sts = INT(len[d=2]*6 + 0.5)
@@ -193,8 +194,16 @@ let/title="# Day"/units="stitches" day_sts = INT(len[d=2]*6 + 0.5)
 let/like=day_temp_min day_min = INT(day_temp_min + 0.5)
 let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 
-list/prec=3/clobber/file=knitting.dat/t=20-sep-`yr-1`:1-jan-`yr` night_sts, day_sts, day_min, day_max
 
+! list/prec=3/clobber/file=knitting.dat/t=20-sep-`yr-1`:1-mar`yr` night_sts, day_sts, day_min, day_max
+
+let dates = tax_datestring(tt,tt,"day")
+list/clobber/norow/file=knitting.dat/t=20-sep-`yr-1`:1-mar-`yr` dates, night_sts, day_sts, day_min, day_max
+
+say Edit knitting.dat to remove the quotes around the dates, and the .00 on the numbers.  Open the file
+message in a browser, in pring options choose 2 pages per sheet, and magnify to make the text larger, ~150%
+
+say 
 say Optionally run the script ambient_histogram.jnl to make histograms of the low and high day data
 
 say
