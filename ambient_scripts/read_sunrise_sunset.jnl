@@ -1,20 +1,16 @@
 
 ! data from https://gml.noaa.gov/grad/solcalc/ split up into a sunrise file and a sunset file.
 
-define symbol yr = ($1"2023|2022|2023|*>0")
-IF `($yr) eq 0` then
-  say only have years 2022 and 2023. Enter one of those years
-  exit/script
-ENDIF
+define symbol yr = 2023
 ! 
-file/skip=7/form=delim/type="num,time,time,time,time,time,time,time,time,time,time,time,time"\
+file/skip=5/form=delim/type="num,time,time,time,time,time,time,time,time,time,time,time,time"\
  /var="day,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec" data/sunrise_($yr).txt
 
 
 ! Note that these are local times, with daylight savings time applied.
 
 
-file/skip=7/form=delim/type="num,time,time,time,time,time,time,time,time,time,time,time,time"\
+file/skip=5/form=delim/type="num,time,time,time,time,time,time,time,time,time,time,time,time"\
  /var="day,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec" data/sunset_($yr).txt
 
 
@@ -28,42 +24,69 @@ say/append/outfile=noaa_day_length_($yr).dat " Day  Length (Hours)"
 let/units=hours/title="day length" daylen = var[d=2] - var[d=1]
 set list/prec=5
 
+let nds = 0
+
 let var = jan
 let nd = var[i=@ngd]
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = feb
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = mar
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = apr
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = may
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = jun
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = jul
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = aug
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = sep
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = oct
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`; say `nds`! ; pause
 
 let var = nov
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
 
 let var = dec
 list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
+let nds = `nds + nd`
+say `nd` ; say `nds`! ; pause
+
 
 !  Now write the whole thing to a file, with dates 2020 - 2023 so
 !  it will be compatible with the time axis in scarf.jnl
@@ -71,16 +94,18 @@ list/append/norow/nohead/file=noaa_day_length_($yr).dat/i=1:`nd` daylen
 cancel data/all
 cancel var/all
 
-define axis/t=1-jan-2020:30-dec-2020:1/edges/units=days tday
+define axis/t=1-jan-2020:1-jan-2021:1/edges/units=days tday
 define grid/t=tday tgrid
 file/skip=3/var="len"/grid=tgrid noaa_day_length_($yr).dat
+
+sh dat! ; pause
 
 let/units=hours/title="day length" noaa_len = reshape(len, t[gt=tday])
 save/clobber/bounds/file=noaa_len_($yr).nc noaa_len
 
 cancel data noaa_day_length_($yr).dat
 
-define axis/t=1-jan-2021:30-dec-2021:1/edges/units=days tday
+define axis/t=1-jan-2021:1-jan-2022:1/edges/units=days tday
 define grid/t=tday tgrid
 file/skip=3/var="len"/grid=tgrid noaa_day_length_($yr).dat
 
@@ -88,7 +113,9 @@ let/units=hours/title="day length" noaa_len = reshape(len, t[gt=tday])
 save/append/file=noaa_len_($yr).nc noaa_len
 cancel data noaa_day_length_($yr).dat
 
-define axis/t=1-jan-2022:30-dec-2022:1/edges/units=days tday
+! well, what about leap day?  The NOAA data doesn't include it even for 2022 data.
+define axis/t=1-jan-2022:1-jan-2023:1/edges/units=days tday
+show axis tday
 define grid/t=tday tgrid
 file/skip=3/var="len"/grid=tgrid noaa_day_length_($yr).dat
 IF ($yr"|2022>1|*>0") then plot len
@@ -97,7 +124,7 @@ let/units=hours/title="day length" noaa_len = reshape(len, t[gt=tday])
 save/append/file=noaa_len_($yr).nc noaa_len
 cancel data noaa_day_length_($yr).dat
 
-define axis/t=1-jan-2023:31-dec-2023:1/edges/units=days tday
+define axis/t=1-jan-2023:1-jan-2024:1/edges/units=days tday
 define grid/t=tday tgrid
 file/skip=3/var="len"/grid=tgrid noaa_day_length_($yr).dat
 IF ($yr"|2023>1|*>0") then plot len
