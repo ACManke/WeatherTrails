@@ -1,0 +1,2 @@
+xterm  -sb -bg oldlace -geometry 200x80 -e tcsh &
+
