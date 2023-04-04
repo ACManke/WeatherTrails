@@ -1,34 +1,47 @@
 ! histogram.jnl
 ! Run this after scarf.jnl - uses defined variables day_min, day_max
+! There is a region set for the current 1-year span
 !  
 set window/new/asp=0.5
 
 set view left
-go frequency_histogram2 day_min[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
+go frequency_histogram2 day_min[t=($start_day)-`yr-1`:($start_day)-`yr`] 2.5 102.5 5
 annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.12 \
   "Frequency Histogram for Daily low Temperatures `yr-1`-`yr` "
 
 let low_cnt = bar_expr
-save/clobber/file=histogram.nc low_cnt
+save/quiet/clobber/file=histogram_`yr`.nc low_cnt
 say
 
 set view right
-go frequency_histogram2 day_max[t=1-jan-2021:31-dec-2022] 2.5 102.5 5
+go frequency_histogram2 day_max[t=($start_day)-`yr-1`:($start_day)-`yr`] 2.5 102.5 5
 annotate/norm/x=0.5/y=-0.2/halign=0/siz=0.12 \
   "Frequency Histogram for Daily High Temperatures `yr-1`-`yr` "
 say
 let high_cnt = bar_expr
-save/append/file=histogram.nc high_cnt
+save/quiet/quiet/append/file=histogram_`yr`.nc high_cnt
 
 cancel variable low_cnt, high_cnt
 
-use histogram.nc
+use histogram_`yr`.nc
 say "Frequency Histogram data for Daily Temperatures `yr-1`-`yr` "
+
+
+
+let names = {"_  ", "_  ", "_  ", "_  ", "_  Eggplant", \
+"_  French Lavendar", "_  Majestic", "_  Jay", "_  Blue", "_  Cyan", "_  Spruce", \
+"_  Macaw", "_  Limeade ", "_  Canary", "_  Turmeric", "_  Kumquat", "_  Orange", \
+"_  Serrano ", "_  Currant", "_  ", "_  "}
+
 let sum = low_cnt+high_cnt
+let colornames = reshape(names, low_cnt)
+
 say
-list/norow yboxlo[gy=high_cnt], yboxhi[gy=high_cnt], low_cnt, high_cnt, sum
+list/nohead/norow yboxlo[gy=low_cnt], yboxhi[gy=low_cnt], low_cnt, high_cnt, sum, colornames
 
-let bar_expr = sum
-go bar_chart2 plot/color=blue sum y " "
-
-go/help bar_chart1.jnl
+cancel data histogram_`yr`.nc
+set data 1
+! let bar_expr = sum
+! go bar_chart2 plot/color=blue sum y " "
+! 
+! go/help bar_chart1.jnl

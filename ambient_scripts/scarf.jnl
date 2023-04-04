@@ -1,7 +1,8 @@
+\cancel mode verify
+
 ! rainbow temperature scarf of one year
 !
 can mode logo
-set mode ver
 
 cancel data/all
 cancel var/all
@@ -23,6 +24,16 @@ cancel view
 
 go ambient_aggregate.jnl
 
+
+let tt = t[gt=temperature]
+let nt = `tt,return=size`
+
+let enddate = tax_datestring(tt[L=`nt`], tt, "day")
+let endyr = tax_datestring(tt[L=`nt`], tt, "year")
+define symbol enddate = `enddate`
+define symbol endyr = `endyr`
+
+
 let deld = 5/(24*60)  ! delta 5 minutes, units of a day
 define axis/t="1-jan-2020:00:00":"31-dec-2023:23:55":`deld`/units=days/t0="1-jan-2020:00:00"/edges time5
 set var/name=temp_in temperature
@@ -32,6 +43,7 @@ let/like=temp_in temperature = temp_in[gt=time5]
 let tt = t[gt=temperature]
 let nt = `tt,return=size`
 
+
 let firsty = `tax_datestring(tt[L=1], tt, "year")`
 let lasty_s = tax_datestring(tt[L=`nt`], tt, "year")
 let lasty = `lasty_s`
@@ -40,14 +52,14 @@ let lasty = `lasty_s`
 let ny = lasty - firsty + 1
 define axis/t=1-jan-`firsty`:31-dec-`lasty`:1/edges/units=days tday
 
-
 let/like=temperature temp_max = temperature[gt=tday@max]
 let/like=temperature temp_min = temperature[gt=tday@min]
 
 set region/t=1-jan-`yr`:31-dec-`yr`
 set region/t=($start_day)-`yr-1`:($start_day)-`yr`
-if ($start_day%|1-jan>1|01-jan>1|*>0%) then \
+if ($start_day%|1-jan>1|01-jan>1|*>0%) then 
    set region/t=($start_day)-`yr`:31-dec-`yr`
+endif
 
 
 ! set region/t=1-nov-`yr-1`:1-nov-`yr`
@@ -59,7 +71,7 @@ show var day_temp_max, day_temp_min
 
 let tt = t[gt=tday]
 
-define ax/y=1:2:1/units=hours yax
+define ax/y=1:2:1 yax ! /units=hours
 let yy = y[gy=yax]
 
 let tempmax2d = day_temp_max + 0*yy
@@ -87,9 +99,7 @@ IF `do_15h` THEN
    show symbol lev_all
    define symbol levs = (12.2),(34),(37.5),(40.2),(42.1),(44.8),(46.8),(49),(51.1),(52.9),(55),(56.8),(60.1),(66.6),(74.6),(92.6)
    
-   pause
    plot/step=connected {12.2,34,37.55,40.2,42.1,44.8,46.85,49,51.1,52.9,55,56.8,60.15,66.65,74.65,92.6}
-   pause
    set window/new
 ENDIF
 
@@ -106,13 +116,12 @@ ENDIF
 ! go margins .8 .8
 
 
-define axis/y=0:24/npoints=144/units=hours yax
+define axis/y=0:24/npoints=144 yax !/units=hours
 let yy = y[gy=yax]
 let yy2d = yy + 0*ll
 
 
 ! Use NOAA day-length.
-set mode ver
 
 use data/noaa_len_2023.nc
 set data 1
@@ -131,7 +140,6 @@ let mask1 = if yy2d lt daylen2d then 1
 let aspect = (24*6/7)/(365*2/10)	! 365*2 days long (2 rows/day), 24 hours by 10 minutes wide
 					! row gauge 10 row/inch, stitch gauge 7 stitch/inch
 
-
 set window/siz=2/asp=`aspect` 
 ! set view nomargin
 set view full
@@ -147,6 +155,8 @@ let mask2 = if yy2d ge daylen2d then 1
 shade/over/nolab/pal=($palette)/lev=($levs) mask2*tempmax2d
 
 annotate/norm/x=0.5/y=1.04/siz=0.1/halign=0 "Low and High Daily Temperature (Deg F) ($start_day)-`yr-1`:($start_day)-`yr`"
+
+
 ! frame/file=scarf_`yr-1`_`yr`.png
 
 ! 144 stitches, 730 rows
@@ -159,7 +169,7 @@ annotate/norm/x=0.5/y=1.04/siz=0.1/halign=0 "Low and High Daily Temperature (Deg
 ! 45-49	cyan			Cyan
 ! 50-54	green			Spruce
 ! 55-59	apple Ggreen		Macaw
-! 60-64	chartreuse		Limeade
+! 60-64	chartreuse		Limeade 
 ! 65-69	yellow			Canary
 ! 70-74	gold			Turmeric
 ! 75-79	lt orange		Kumquat
@@ -194,17 +204,30 @@ let/title="# Day"/units="stitches" day_sts = INT(len[d=2]*6 + 0.5)
 let/like=day_temp_min day_min = INT(day_temp_min + 0.5)
 let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 
-
-! list/prec=3/clobber/file=knitting.dat/t=20-sep-`yr-1`:1-mar`yr` night_sts, day_sts, day_min, day_max
-
+set mode ver
 let dates = tax_datestring(tt,tt,"day")
-list/clobber/norow/file=knitting.dat/t=20-sep-`yr-1`:1-mar-`yr` dates, night_sts, day_sts, day_min, day_max
-
-say Edit knitting.dat to remove the quotes around the dates, and the .00 on the numbers.  Open the file
-message in a browser, in pring options choose 2 pages per sheet, and magnify to make the text larger, ~150%
+if `yr eq ($endyr)` then
+   list/clobber/norow/file=knitting.dat/t=20-sep-`yr-1`:"($enddate):23:59" dates, night_sts, day_sts, day_min, day_max
+else
+   list/clobber/norow/file=knitting.dat/t=20-sep-`yr-1`:"20-sep-`yr`:23:59" dates, night_sts, day_sts, day_min, day_max
+endif
 
 say 
 say Optionally run the script ambient_histogram.jnl to make histograms of the low and high day data
 
 say
 say Or in a new session, run temp_rnb_barcharts.jnl
+
+
+say  ****** Edit knitting.dat to remove the quotes around the dates, and the .00 on the numbers.  Open the file
+say  ****** in a browser, in pring options choose 2 pages per sheet, and magnify to make the text larger, ~150%
+
+
+! go ambient_histogram
+
+! set window/siz=2/asp=0.5/new
+
+! let/like=day_temp_max/title="Daily Temperature High - Low" diff =  day_temp_max - day_temp_min
+! let smooth = 5
+! plot/color=blue/thick/title="Daily Temperature High - Low, and smoothed over `smooth` days" diff
+! plot/over/color=red/thick/nolab diff[L=@sbx:`smooth`]
