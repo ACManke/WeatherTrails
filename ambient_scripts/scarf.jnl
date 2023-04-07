@@ -198,13 +198,12 @@ let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 
 let/like=noaa_len[d=2] len = noaa_len[d=2,gt=tday]
 
-let/title="# Night"/units="stitches" night_sts = INT((24-len[d=2])*6 + 0.5)
 let/title="# Day"/units="stitches" day_sts = INT(len[d=2]*6 + 0.5)
+let/title="# Night"/units="stitches" night_sts = 144 - day_sts
 
 let/like=day_temp_min day_min = INT(day_temp_min + 0.5)
 let/like=day_temp_max day_max= INT(day_temp_max + 0.5)
 
-set mode ver
 let dates = tax_datestring(tt,tt,"day")
 if `yr eq ($endyr)` then
    list/clobber/norow/file=knitting.dat/t=20-sep-`yr-1`:"($enddate):23:59" dates, night_sts, day_sts, day_min, day_max
