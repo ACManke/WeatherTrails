@@ -29,8 +29,6 @@ cancel data/all
 cancel variable/all
 cancel symbol/all
 
-set window/aspect=1/siz=2
-cancel mode logo
 
 define symbol infile = ($1).csv
 define symbol month = ($2)
@@ -177,6 +175,11 @@ let/units="W/m^2"/title="Solar Radiation" solar_rad = reshape(sol_in, tt)
 
 save/clobber/outtype=float/file="data/($outfile)" Temperature, Feels_Like, Dew_Point, Indoor_Temperature, \
  WindSpeed, WindGust, WindGustMax, WindDir, Hourly_Rain, Daily_Rain, Relative_Pressure, Humidity, uv_index, solar_rad
+
+! Make a couple of plots of the new data	
+
+set window/aspect=1/siz=2
+cancel mode logo
 
 cancel var/all
 cancel data/all

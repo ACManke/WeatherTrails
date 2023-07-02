@@ -20,7 +20,6 @@ let/like=($var)/title="`($var),return=title` ($trans)" ($var)_day_($trans) = ($v
 
 define symbol var_title = Daily ($trans_title) `($var),return=title`
 
-
 IF ($temp_diff"0|*>1") THEN
    
    let day_min = ($var)[gt=tday@min]
@@ -40,7 +39,7 @@ if `($reference)` then\
 
 ! ----------------------
 ! Plotting a subset of the year - a few months before the current date
-! To set particular dates, set date1 and date2 below call to date_range below
+! To set particular dates, set date1 and date2 after the call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
 
 define symbol smoothing = 1
@@ -49,7 +48,9 @@ define symbol yrm = 1
 
 define symbol date1 = 01-Jan
 define symbol date2 = 31-Dec
-GO date_range
+
+let nmon = 2  ! start nmon 2 months before the current month (end of record)
+GO date_range `nmon`
 
 ! variable to plot and plot-style.
 let/like=($var)_day_($trans) var = ($var)_day_($trans)
@@ -157,60 +158,63 @@ IF `strindex(upcase("($units)"), "INCH") GT 0` THEN let ax_add = 1
    
 let lev_hi = ny + 0.5
 
-! if its a max-min diff plot do not do monthly overall max or min
+! If its a max-min diff plot show the maximum difference
 
-IF ($trans"0|diff>0|*>1") THEN
+set window/new/size=2/aspect=1; go ptest; cancel view
 
-   set window/new/size=2/aspect=1; go ptest; cancel view
-   
-   define symbol plot_annotation = ($trans_title)est `($var),return=title` (($units))
-   
+IF ($trans"0|diff>1|*>0") THEN
+   define symbol plot_annotation = Monthly Greatest outdoor temperature difference (Deg F)
+   let/units="($units)" ($var)_month_($trans)  =  temperature_day_diff[gt=tmonth@max]
+   let/units="($units)" month_var =  if ($var)_month_($trans) then ($var)_month_($trans) else 0
+
+ELSE
+
+   define symbol plot_annotation = Monthly ($trans_title)est `($var),return=title` (($units))
    
    let/units="($units)" ($var)_month_($trans) =  ($var)_day_($trans)[gt=tmonth@($trans)]
    let/units="($units)" month_var =  if ($var)_month_($trans) then ($var)_month_($trans) else 0
+
+ENDIF
+
+let mm = L[gt=month_var]
+let color = INT( (mm-1)/12) + 1
+
+let ax_lo = INT(($var)_month_($trans)[t=@min]) - ax_add
+let ax_hi = INT(($var)_month_($trans)[t=@max]) + ax_add
+
+IF `STRINDEX("($var)", "rain") GT 0` THEN LET ax_lo = 0
+
+set view upper
+plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_var
+
+! Draw a bar-chart showing monthly data
+
+go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_var color
+annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
+
+set view lower
+
+define symbol plot_title = ($color_label)
+define symbol plot_style = /nolab/step=connected/vlim=`ax_lo`:`ax_hi`/line/thick/nokey
+
+plot/color=($color1)/($plot_style)/title="($plot_title)"/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
+plot/nolab/nokey/over/thick/color=($color1)/sym=26/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
+
+
+let yr = firsty + 1
+cancel symbol yearlab
+
+repeat/range=2:`ny`/name=yy (\
+ define symbol yy = `yy`;\
+ set view lower($yy);\
+ plot/nolab/axes=0,0,0,0($plot_style)/color=($color($yy))/lev=(0.5,`lev_hi`,1)/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
+ plot/nolab/nokey/over/thick/color=($color($yy))/sym=26/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
+ let yr = `yr + 1`)
+
+IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
+annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
+annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
    
-   let mm = L[gt=month_var]
-   let color = INT( (mm-1)/12) + 1
-   
-   let ax_lo = INT(($var)_month_($trans)[t=@min]) - ax_add
-   let ax_hi = INT(($var)_month_($trans)[t=@max]) + ax_add
-   
-   IF `STRINDEX("($var)", "rain") GT 0` THEN LET ax_lo = 0
-   
-   set view upper
-   plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_var
-   
-   ! Draw a bar-chart showing monthly data
-   
-   go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_var color
-   annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
-   
-   set view lower
-   
-   define symbol plot_title = ($color_label)
-   define symbol plot_style = /nolab/step=connected/vlim=`ax_lo`:`ax_hi`/line/thick/nokey
-   
-   plot/color=($color1)/($plot_style)/title="($plot_title)"/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
-   plot/nolab/nokey/over/thick/color=($color1)/sym=26/t=15-jan-`firsty`:15-dec-`firsty` ($var)_month_($trans)
-   
-   
-   let yr = firsty + 1
-   cancel symbol yearlab
-   
-   repeat/range=2:`ny`/name=yy (\
-    define symbol yy = `yy`;\
-    set view lower($yy);\
-    plot/nolab/axes=0,0,0,0($plot_style)/color=($color($yy))/lev=(0.5,`lev_hi`,1)/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
-    plot/nolab/nokey/over/thick/color=($color($yy))/sym=26/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
-    let yr = `yr + 1`)
-   
-   IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
-   annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
-   annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
-   
-   annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
-   
-endif  ! if its a max-min diff plot do not do monthly overall max or min
 
 ! ---------------------------------------------------------------------
 message now average monthly
@@ -309,8 +313,6 @@ say " "
 let tm = t[gt=monthly]
 let modate = TAX_DATESTRING(tm, tm, "month")
 
-define symbol var_title = Monthly Average `($var),return=title`
-
 if ($reference) then
    use data/everett_climatology.nc
    use data/seattle_climatology.nc
@@ -336,8 +338,8 @@ if ($reference) then
    cancel symbol varlist
 
    repeat/range=1:`ny`/name=yy (\
-   let/title="Ambient ($var_title) `yr`" c`yr` = reshape(($var)_month_ave_($trans)[L=`m1`:`m1+11`], t[gt=month_irreg]);\
-   define symbol varlist = ($varlist)($comma)c`yr`;\
+   let/title="`yr` monthly average" y`yr` = reshape(($var)_month_ave_($trans)[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)y`yr`;\
    define symbol comma = , ;\
    let m1 = `m1+12`;\
    let yr = `yr+1`)
@@ -359,8 +361,8 @@ else
    cancel symbol varlist
 
    repeat/range=1:`ny`/name=yy (\
-   let/title="Ambient ($var_title) `yr`" c`yr` = reshape(($var)_month_ave_($trans)[L=`m1`:`m1+11`], t[gt=month_irreg]);\
-   define symbol varlist = ($varlist)($comma)c`yr`;\
+   let/title="`yr` monthly average" y`yr` = reshape(($var)_month_ave_($trans)[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)y`yr`;\
    define symbol comma = ,;\
    let m1 = `m1+12`;\
    let yr = `yr+1`)

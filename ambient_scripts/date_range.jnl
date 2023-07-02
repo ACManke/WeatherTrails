@@ -3,8 +3,10 @@
 ! date_range.jnl
 ! Compute the start and end dates for a date range to plot data for 
 ! each year with all other years.
-! Set to 3 months prior to the current date.
+! Set to nmon months prior to the current date.
 ! If we're near the start of the year, start with Jan 1 to end of current data
+
+let nmon = ($1%3%)
 
 DEFINE SYMBOL date1 = 01-Jan
 DEFINE SYMBOL date2 = 31-Jan
@@ -21,10 +23,10 @@ let thismonth = "`SUBSTRING("($date2)", 4, 3)`"
 let monthnames = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
 let monthnum = ELEMENT_INDEX_STR(thismonth, monthnames)
 
-IF `monthnum GE 3` THEN
-   LET imonth = monthnum - 2
+IF `monthnum GE (nmon+1)` THEN
+   LET imonth = monthnum - nmon
 ELSE
-   LET imonth = monthnum - 2 + 12
+   LET imonth = monthnum - nmon + 12
    DEFINE SYMBOL yrm = 1
 ENDIF
 

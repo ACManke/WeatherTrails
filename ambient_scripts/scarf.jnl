@@ -218,8 +218,12 @@ say
 say Or in a new session, run temp_rnb_barcharts.jnl
 
 
-say  ****** Edit knitting.dat to remove the quotes around the dates, and the .00 on the numbers.  Open the file
-say  ****** in a browser, in pring options choose 2 pages per sheet, and magnify to make the text larger, ~150%
+say  ******
+say         Edit knitting.dat to remove the quotes around the dates, and the .00 on the numbers.  Open the file
+say         in a browser, in pring options choose 2 pages per sheet, and magnify to make the text larger, ~150%
+say         For lines to be filled in as we go - save dates, night, day as csv then import into Google Sheets. 
+say         See knitting_apr23 in Google Drive
+say  ******
 
 
 ! go ambient_histogram

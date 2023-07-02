@@ -49,6 +49,8 @@ ELSE
    DEFINE SYMBOL trans = `dncase("($2)")`
 ENDIF
 
+pause
+
 DEFINE SYMBOL reference = 0
 IF ($3"0|0|1|2>1|*>1") THEN 
    DEFINE SYMBOL reference = ($3)
