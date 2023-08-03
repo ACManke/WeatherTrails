@@ -42,7 +42,7 @@ if `($reference)` then\
 ! To set particular dates, set date1 and date2 after the call to date_range below
 ! date1 must be before date 2, a range within a single calendar year
 
-define symbol smoothing = 1
+define symbol smoothing = 6
 if ($trans"0|diff>1|*>0") then define symbol smoothing = 5
 define symbol yrm = 1
 

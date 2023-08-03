@@ -362,8 +362,8 @@ IF ($reference) THEN
    cancel symbol varlist
 
    repeat/range=1:`ny`/name=yy (\
-   let/title="Ambient ($var_title) `yr`" c`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
-   define symbol varlist = ($varlist)($comma)c`yr`;\
+   let/title="Ambient ($var_title) `yr`" Y`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)Y`yr`;\
    define symbol comma = , ;\
    let m1 = `m1+12`;\
    let yr = `yr+1`)
@@ -381,8 +381,8 @@ else
    cancel symbol varlist
 
    repeat/range=1:`ny`/name=yy (\
-   let/title="Ambient ($var_title) `yr`" c`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
-   define symbol varlist = ($varlist)($comma)c`yr`;\
+   let/title="Ambient ($var_title) `yr`" Y`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)Y`yr`;\
    define symbol comma = ,;\
    let m1 = `m1+12`;\
    let yr = `yr+1`)
