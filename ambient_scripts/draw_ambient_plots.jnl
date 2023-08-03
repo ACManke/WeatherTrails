@@ -215,6 +215,26 @@ IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
 annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
 annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
    
+say " "
+
+! -------------- List monthly data --------------
+
+
+
+   let m1 = 1
+   let yr = firsty
+   cancel symbol comma
+   cancel symbol varlist
+
+   repeat/range=1:`ny`/name=yy (\
+   let/title="`yr` monthly ($trans_title)est" y`yr` = reshape(($var)_month_($trans)[L=`m1`:`m1+11`], t[gt=month_irreg]);\
+   define symbol varlist = ($varlist)($comma)y`yr`;\
+   define symbol comma = ,;\
+   let m1 = `m1+12`;\
+   let yr = `yr+1`)
+   list ($varlist)
+
+
 
 ! ---------------------------------------------------------------------
 message now average monthly
