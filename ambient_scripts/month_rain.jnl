@@ -41,8 +41,11 @@ plot/line/over/nolab/color=($color)/thick/t=1-apr-`year`:1-may-`year` apr
 let may= if t[gt=day_rain] ge `may_1` and t[gt=day_rain] lt `jun_1` then day_rain[t=@rsum] else 0
 plot/line/over/nolab/color=($color)/thick/t=1-may-`year`:1-jun-`year` may
 
-let jun= if t[gt=day_rain] ge `jun_1` and t[gt=day_rain] lt `aug_1` then day_rain[t=@rsum] else 0
-plot/line/over/nolab/color=($color)/thick/t=1-jun-`year`:1-aug-`year` jun
+let jun= if t[gt=day_rain] ge `jun_1` and t[gt=day_rain] lt `jul_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-jun-`year`:1-jul-`year` jun
+
+let jul= if t[gt=day_rain] ge `jul_1` and t[gt=day_rain] lt `aug_1` then day_rain[t=@rsum] else 0
+plot/line/over/nolab/color=($color)/thick/t=1-jul-`year`:1-aug-`year` jul
 
 let aug = if t[gt=day_rain] ge `aug_1` and t[gt=day_rain] lt `sep_1` then day_rain[t=@rsum] else 0
 plot/line/over/nolab/color=($color)/thick/t=1-aug-`year`:1-sep-`year` aug

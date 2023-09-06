@@ -51,26 +51,24 @@ ENDIF
 
 
 DEFINE SYMBOL reference = 0
-IF ($3"0|0|1|2>1|*>1") THEN 
-   DEFINE SYMBOL reference = ($3)
-   IF ($reference"0|1|*>0") THEN
-      DEFINE SYMBOL reference_data = data/everett_climatology.nc
-      DEFINE SYMBOL reference_title = Paine Field
-   ELIF ($reference"0|2>1|*>0") THEN
-      DEFINE SYMBOL reference_data = data/seattle_climatology.nc
-      DEFINE SYMBOL reference_title = Seatac 
-   ELSE
-      say Argument 3 may be 1 to show Paine Field averages or 2 to show Seatac averages. Ignoring.
-      DEFINE SYMBOL reference = 0
-   ENDIF
+DEFINE SYMBOL reference = ($3%1%)
+IF ($reference"0|1|*>0") THEN
+   DEFINE SYMBOL reference_data = data/everett_climatology.nc
+   DEFINE SYMBOL reference_title = Paine Field
+ELIF ($reference"0|2>1|*>0") THEN
+   DEFINE SYMBOL reference_data = data/seattle_climatology.nc
+   DEFINE SYMBOL reference_title = Seatac 
+ELSE
+   say Argument 3 may be 1 to show Paine Field averages or 2 to show Seatac averages. Ignoring.
+   DEFINE SYMBOL reference = 0
+ENDIF
 
-   IF `($reference) GT 0 AND (($var"|temperature>1|diff>1|daily_rain>1|*>0") EQ 0)` THEN
-      say
-      say Paine Field or Seatac data plotted with Temperature, Temperature-difference or Daily_Rain only
-      say Ignoring reference-data setting for ($var)
-      DEFINE SYMBOL reference = 0
+IF `($reference) GT 0 AND (($var"|temperature>1|diff>1|daily_rain>1|*>0") EQ 0)` THEN
+   say
+   say Paine Field or Seatac data plotted with Temperature, Temperature-difference or Daily_Rain only
+   say Ignoring reference-data setting for ($var)
+   DEFINE SYMBOL reference = 0
 
-   ENDIF
 ENDIF
 
 
@@ -110,6 +108,7 @@ define view/x=0:1/y=0:1 full($yy);\
 define view/x=0:1/y=0.5:1/text=1 upper($yy);\
 define view/x=0:1/y=0:0.5/text=1 lower($yy);\
 )
+
 
 ! Define colors to show year by year data
 

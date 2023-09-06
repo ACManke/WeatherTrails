@@ -16,25 +16,23 @@ else
    set window/aspect=0.5/size=2
 endif
 
+! Plot reference rainfall from Paine Field by default
 
-define symbol reference = 0
-if ($1"0|0|1|2|*>1") then 
-   define symbol reference = ($1)
-   if ($reference"0|1|*>0") then
-      define symbol reference_data = data/everett_climatology.nc
-      define symbol reference_title = Paine Field
-      define symbol reference_name = Paine
-   endif
-   if ($reference"0|2>1|*>0") then
-      define symbol reference_data = data/seattle_climatology.nc
-      define symbol reference_title = Seatac 
-      define symbol reference_name = Seatac 
-   endif
-
-   !  Plot style for overlaying monthly reference data
-   define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.03,0.03,0.03,0.03)
-
+define symbol reference = ($1"1|0|1|2|*>1")
+if ($reference"0|1|*>0") then
+   define symbol reference_data = data/everett_climatology.nc
+   define symbol reference_title = Paine Field
+   define symbol reference_name = Paine
 endif
+if ($reference"0|2>1|*>0") then
+   define symbol reference_data = data/seattle_climatology.nc
+   define symbol reference_title = Seatac 
+   define symbol reference_name = Seatac 
+endif
+
+!  Plot style for overlaying monthly reference data
+if `($reference) GT 0` \
+ define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.03,0.03,0.03,0.03)
 
 cancel data/all
 
@@ -177,7 +175,7 @@ set window/new/title="Monthly Rain"/size=2/aspect=1
 
 ! Plot accumulated rain in each month
 set view lower
-go margins 1.4 1 1.2 1.0
+go margins 0.8 1.4 1.0
 
 
 let month_min = 0
@@ -211,18 +209,18 @@ let yr = firsty + 1
 repeat/range=2:`ny`/name=yy (\
 define symbol yy = `yy`;\
 set view lower($yy);\
-go margins 1.4 1 1.2 1.0;\
+go margins 0.8 1.4 1.0;\
 go month_rain `yr` ($color($yy));\
 let yr = `yr + 1`)
 can mode ver
 IF ($reference) THEN
    set view lower`ny+1`
-   go margins 1.4 1 1.2 1.0
+   go margins 0.8 1.4 1.0
    use ($reference_data)
    plot/vlim=`ax_lo`:`month_max`/noax/($graystyle) rain
    set data 1
 ENDIF
-annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "Monthly Rain Accumulation <NL> ($color_label)"
+annotate/norm/x=0.5/y=1.2/halign=0/siz=0.14 "Monthly Rain Accumulation <NL> ($color_label)"
 
 ! Block out the year labels
 define view/axes/x=0.45:0.55/y=0.08:0.11 block
@@ -231,8 +229,7 @@ set view block
 shade/nolab/noax/pal=white/x=0:5/y=0:5/nokey x+y
 
 ! Draw a bar-chart showing month_rain
-set view upper
-go margins 1.4 1 1.2 1.0
+set view upper; go margins 1.4 0.8 1.0
 
 let tm = t[gt=tmonth]
 let color = strfloat(tax_datestring(tm, tm, "year")) - 2019
@@ -241,7 +238,7 @@ plot/step=conn/nolab/color=black/vlim=`month_min`:`month_max`/title="month_rain 
 
 define symbol levels = (0.5,`ny`.5,1)
 go bar_chart3 poly/axes/over/nolab/fill/line/pal=($palette_name)/lev=($levels) month_rain color
-annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "Monthly Rainfall"
+annotate/norm/x=0.5/y=1.2/halign=0/siz=0.14 "Monthly Rainfall"
 
 let tm = t[gt=month_rain]
 let modate = TAX_DATESTRING(tm, tm, "month")
@@ -282,7 +279,7 @@ IF ($reference) THEN
 
    define sym enddate = 31-dec-`firsty`
    let rain_yearsum = month_rain[t=($timerange)@sum]
-   define symbol year_sums = Yearly Totals: `firsty` `rain_yearsum,p=3`
+   define symbol year_sums = Yearly Totals: `firsty`(`rain_yearsum,p=3`)
 
    let yr = firsty+1
    repeat/range=2:`ny`/name=yy (\
@@ -293,7 +290,7 @@ IF ($reference) THEN
    list($list_quals)/t=($timerange)  modate, month_rain, rainsum, ($reference_name), ($reference_name)sum;\
    define sym enddate = 31-dec-`yr`;\
    let rain_yearsum = month_rain[t=($timerange)@sum];\
-   define symbol year_sums = ($year_sums),   `yr` `rain_yearsum,p=3`;\
+   define symbol year_sums = ($year_sums),   `yr`(`rain_yearsum,p=3`);\
    say;\
    let yr = `yr + 1`)
 
@@ -315,7 +312,7 @@ else
 
    define sym enddate = 31-dec-`firsty`
    let rain_yearsum = month_rain[t=($timerange)@sum]
-   define symbol year_sums = Clinton Yearly Totals:: `firsty` `rain_yearsum,p=3`
+   define symbol year_sums = Clinton Yearly Totals: `firsty`(`rain_yearsum,p=3`)
 
    let yr = firsty+1
    repeat/range=2:`ny`/name=yy (\
@@ -325,7 +322,7 @@ else
    list($list_quals)/t=($timerange) modate, month_rain, rainsum;\
    define sym enddate = 31-dec-`yr`;\
    let rain_yearsum = month_rain[t=($timerange)@sum];\
-   define symbol year_sums = ($year_sums),  `yr` `rain_yearsum,p=3`;\
+   define symbol year_sums = ($year_sums),  `yr`(`rain_yearsum,p=3`);\
    say;\
    let yr = `yr + 1`)
 

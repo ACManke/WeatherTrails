@@ -33,9 +33,10 @@ repeat/range=1:`ny`/name=q (\
  let dax_lo = `ml`;\
  let dax_hi = `mh`;\
  define symbol spacer = -;\
+ cancel symbol spacer ;\
  if `q eq ny` then cancel symbol spacer;\
- IF `($yrm"0") EQ 0` THEN define symbol color_label = ($color_label) `yr` ($name($count)) ($spacer);\
- IF `($yrm"0") EQ 1` THEN define symbol color_label = ($color_label) `yr-1`-`yr` ($name($count)) ($spacer);\
+ IF `($yrm"0") EQ 0` THEN define symbol color_label = ($color_label) `yr` (($name($count))) ($spacer);\
+ IF `($yrm"0") EQ 1` THEN define symbol color_label = ($color_label) `yr-1`-`yr` (($name($count))) ($spacer);\
  )
 
 define symbol plot_title = ($var_title)  <NL> ($color_label)

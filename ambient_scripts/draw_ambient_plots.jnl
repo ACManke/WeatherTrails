@@ -8,6 +8,7 @@ ELSE
    set window/aspect=0.5/size=2; go ptest; cancel view
 ENDIF
 
+pause
 define symbol trans_title = ($trans"|max>High|min>Low")
 
 ! Daily axis. Start 2 months before the start of the first year, to 
@@ -49,7 +50,7 @@ define symbol yrm = 1
 define symbol date1 = 01-Jan
 define symbol date2 = 31-Dec
 
-let nmon = 2  ! start nmon 2 months before the current month (end of record)
+let nmon = 0  ! start nmon months before the current month (end of record)
 GO date_range `nmon`
 
 ! variable to plot and plot-style.
@@ -92,9 +93,11 @@ repeat/range=2:`ny`/name=yy (\
  plot($plotstyle)/color=($color($yy))/axes=0,0,0,0/nolab($timerange) var;\
  let yr = `yr + 1`)
 
-
-annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather `($var),return=title` Data, recent months"
-
+IF `nmon GT 0` THEN
+   annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather `($var),return=title` Data, recent months"
+ELSE
+   annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather `($var),return=title` Data, recent month"
+ENDIF
 
 say Plotting smoothed data for ($date1) to ($date2).  Edit draw_ambient_plots.jnl to change the date range or add smoothing
 pause
@@ -116,7 +119,7 @@ IF `STRINDEX("($var)", "rain") GT 0` THEN LET ax_lo = 0
 define symbol plot_title = ($var_title)  <NL> ($color_label)
 
 set view full
-plot/color=($color1)/thick/vlim=`ax_lo`:`ax_hi`/title="($plot_title)" ($var)_day_($trans)[gt=tday, t=1-jan-`firsty`:31-dec-`firsty`]
+plot/color=($color1)/thick/vlim=`ax_lo`:`ax_hi`/title="($plot_title)  Average (black)" ($var)_day_($trans)[gt=tday, t=1-jan-`firsty`:31-dec-`firsty`]
 
 let yr = firsty + 1
 cancel symbol yearlab
@@ -128,11 +131,20 @@ repeat/range=2:`ny`/name=yy (\
  let yr = `yr + 1`)
 
 IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
-annotate/norm/x=0.523/y=-0.132/siz=0.11/halign=-1 " ($yearlab)";\
+annotate/norm/x=0.523/y=-0.132/siz=0.11/halign=-1 " ($yearlab)"
 
 annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather `($var),return=title` Data"
 
+! Average daily data
+define view/x=0:1/y=0:1 fullmod
+set view fullmod
+
+define axis/t=0:365.2425/edges/npoints=365/t0=1-jan-0001/units=days/modulo tdaily
+let/like=($var)_day_($trans) dailyclim=($var)_day_($trans)[gt=tdaily@mod]
+
+plot/color=black/axes=0,0,0,0/nolab/vlim=`ax_lo`:`ax_hi` dailyclim
 pause
+
  
 
 ! ---------------------------------------------------------------------
@@ -184,15 +196,15 @@ let ax_hi = INT(($var)_month_($trans)[t=@max]) + ax_add
 
 IF `STRINDEX("($var)", "rain") GT 0` THEN LET ax_lo = 0
 
-set view upper
+set view upper; go margins 1.4 0.8
 plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_var
 
 ! Draw a bar-chart showing monthly data
 
 go bar_chart3 poly/axes/over/nolab/fill/line/pal=ambient_palette/lev=(0.5,`lev_hi`,1) month_var color
-annotate/norm/x=0.5/y=1.5/halign=0/siz=0.2 "($plot_annotation)"
+annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "($plot_annotation)"
 
-set view lower
+set view lower; go margins 0.8 1.4
 
 define symbol plot_title = ($color_label)
 define symbol plot_style = /nolab/step=connected/vlim=`ax_lo`:`ax_hi`/line/thick/nokey
@@ -206,7 +218,7 @@ cancel symbol yearlab
 
 repeat/range=2:`ny`/name=yy (\
  define symbol yy = `yy`;\
- set view lower($yy);\
+ set view lower($yy); go margins 0.8 1.4;\
  plot/nolab/axes=0,0,0,0($plot_style)/color=($color($yy))/lev=(0.5,`lev_hi`,1)/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
  plot/nolab/nokey/over/thick/color=($color($yy))/sym=26/t=15-jan-`yr`:15-dec-`yr` ($var)_month_($trans);\
  let yr = `yr + 1`)
@@ -254,7 +266,7 @@ let color = INT( (mm-1)/12) + 1
 let ax_lo = INT(($var)_month_ave_($trans)[t=@min]) - ax_add
 let ax_hi = INT(($var)_month_ave_($trans)[t=@max]) + ax_add
 
-set view upper
+set view upper; go margins 1.4 0.8
 plot/step=conn/nolab/color=black/vlim=`ax_lo`:`ax_hi`/title=" " month_var
 
 ! Draw a bar-chart showing monthly
@@ -279,7 +291,7 @@ if `($reference)` then
 endif
 
 
-set view lower
+set view lower; go margins 0.8 1.4
 define symbol plot_title = ($color_label)
 
 define symbol plot_style = /nolab/step=connected/vlim=`ax_lo`:`ax_hi`/line/thick/nokey
@@ -292,7 +304,7 @@ cancel symbol yearlab
 
 repeat/range=2:`ny`/name=yy (\
  define symbol yy = `yy`;\
- set view lower($yy);\
+ set view lower($yy); go margins 0.8 1.4;\
  plot/nolab/axes=0,0,0,0/ribbon($plot_style)/nokey/pal=ambient_palette/lev=(0.5,`lev_hi`,1)/t=15-jan-`yr`:15-dec-`yr` ($var)_month_ave_($trans), color;\
  plot/nolab/nokey/over/thick/color=($color($yy))/sym=26/t=15-jan-`yr`:15-dec-`yr` ($var)_month_ave_($trans);\
  let yr = `yr + 1`)
