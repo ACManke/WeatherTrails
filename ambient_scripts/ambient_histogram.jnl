@@ -37,7 +37,7 @@ let sum = low_cnt+high_cnt
 let colornames = reshape(names, low_cnt)
 
 say
-list/nohead/norow yboxlo[gy=low_cnt], yboxhi[gy=low_cnt], low_cnt, high_cnt, sum, colornames
+list/norow yboxlo[gy=low_cnt], yboxhi[gy=low_cnt], low_cnt, high_cnt, sum, colornames
 
 cancel data histogram_`yr`.nc
 set data 1

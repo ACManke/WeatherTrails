@@ -19,6 +19,7 @@ endif
 ! Plot reference rainfall from Paine Field by default
 
 define symbol reference = ($1"1|0|1|2|*>1")
+
 if ($reference"0|1|*>0") then
    define symbol reference_data = data/everett_climatology.nc
    define symbol reference_title = Paine Field
@@ -31,7 +32,7 @@ if ($reference"0|2>1|*>0") then
 endif
 
 !  Plot style for overlaying monthly reference data
-if `($reference) GT 0` \
+if `($reference) GT 0` THEN\
  define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.03,0.03,0.03,0.03)
 
 cancel data/all
