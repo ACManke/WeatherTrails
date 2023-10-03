@@ -1,14 +1,6 @@
 ! The variable and transformation are defined, as symbols 
 ! ($var) and ($trans). Draw the plots
 
-! If we've drawn other plots, open a new plot window
-IF ($win_title"0|*>1") THEN 
-   set window/new/aspect=0.5/size=2; go ptest; cancel view
-ELSE
-   set window/aspect=0.5/size=2; go ptest; cancel view
-ENDIF
-
-pause
 define symbol trans_title = ($trans"|max>High|min>Low")
 
 ! Daily axis. Start 2 months before the start of the first year, to 
@@ -50,7 +42,7 @@ define symbol yrm = 1
 define symbol date1 = 01-Jan
 define symbol date2 = 31-Dec
 
-let nmon = 0  ! start nmon months before the current month (end of record)
+let nmon = 2  ! start nmon months before the current month (end of record)
 GO date_range `nmon`
 
 ! variable to plot and plot-style.
@@ -73,8 +65,8 @@ let dax_hi =  `INT(dax_hi + 1)`
 
 define symbol plotstyle=($plotstyle)/vlim=`dax_lo`:`dax_hi`
 
+set window/aspect=0.5/size=2 1
 set view full
-
 
 define symbol timerange = /t=($date1)-`firsty`:($date2)-`firsty`
 IF ($yrm"0") THEN define symbol timerange = /t=($date1)-`firsty-1`:($date2)-`firsty`
@@ -131,7 +123,8 @@ repeat/range=2:`ny`/name=yy (\
  let yr = `yr + 1`)
 
 IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
-annotate/norm/x=0.523/y=-0.132/siz=0.11/halign=-1 " ($yearlab)"
+annotate/norm/x=0.523/y=-0.133/siz=0.11/halign=-1 " ($yearlab)"
+
 
 annotate/norm/x=0.5/y=1.05/siz=0.14/halign=0 "Ambient Weather `($var),return=title` Data"
 
@@ -172,7 +165,7 @@ let lev_hi = ny + 0.5
 
 ! If its a max-min diff plot show the maximum difference
 
-set window/new/size=2/aspect=1; go ptest; cancel view
+set window/new/size=2/aspect=1
 
 IF ($trans"0|diff>1|*>0") THEN
    define symbol plot_annotation = Monthly Greatest outdoor temperature difference (Deg F)
@@ -224,7 +217,8 @@ repeat/range=2:`ny`/name=yy (\
  let yr = `yr + 1`)
 
 IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
-annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
+annotate/norm/x=0.533/y=-0.205/siz=0.11/halign=-1 " ($yearlab)"
+
 annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
    
 say " "
@@ -250,7 +244,7 @@ say " "
 
 ! ---------------------------------------------------------------------
 message now average monthly
-set window/new/title="Average ($var)"/size=2/aspect=1; go ptest; cancel view
+set window/new/title="Average ($var)"/size=2/aspect=1
 
 
 !  Monthly Average high/low
@@ -310,8 +304,9 @@ repeat/range=2:`ny`/name=yy (\
  let yr = `yr + 1`)
 
 IF `ny GT 1` THEN define symbol yearlab = ($yearlab) - `yr-1`
-annotate/norm/x=0.523/y=-0.27/siz=0.11/halign=-1 " ($yearlab)"
-annotate/norm/x=0.523/y=-0.5/siz=0.18/halign=0 "($plot_title)"
+annotate/norm/x=0.533/y=-0.205/siz=0.11/halign=-1 " ($yearlab)"
+
+annotate/norm/x=0.523/y=-0.5/siz=0.22/halign=0 "($plot_title)"
 
 say " "
 say "($plot_annotation)"
