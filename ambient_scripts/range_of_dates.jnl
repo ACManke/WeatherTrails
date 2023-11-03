@@ -1,6 +1,6 @@
 \cancel mode verify
 !
-! date_range.jnl
+! range_of_dates.jnl
 ! Compute the start and end dates for a date range to plot data for 
 ! each year with all other years.
 ! Set to nmon months prior to the current date.

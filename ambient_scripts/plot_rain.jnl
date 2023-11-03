@@ -33,7 +33,7 @@ endif
 
 !  Plot style for overlaying monthly reference data
 if `($reference) GT 0` THEN\
- define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.03,0.03,0.03,0.03)
+ define symbol graystyle = /nolab/step=connected/line/color=(50,50,50)/dash=(0.05,0.05,0.05,0.05)
 
 cancel data/all
 
@@ -105,7 +105,7 @@ let/like=day_rain var = day_rain[L=@SBX:($smoothing)]
 
 define symbol date1 = 01-jan
 define symbol date2 = 31-Dec
-GO date_range
+GO range_of_dates
 GO color_labels ($date1) ($date2)
 
 define symbol plot_title = ($var_title)<NL> ($color_label)  ! *****
@@ -244,11 +244,11 @@ annotate/norm/x=0.5/y=1.2/halign=0/siz=0.14 "Monthly Rainfall"
 let tm = t[gt=month_rain]
 let modate = TAX_DATESTRING(tm, tm, "month")
 
-IF ($reference) THEN  ! overlay gray line for the reference data
+IF ($reference) THEN  ! overlay dashed line for the reference data
 
    let/like=rain[d=2] Reference = rain[d=2, gt=tmonth]
    plot/over($graystyle) Reference
-   annotate/norm/x=0/y=1.4/siz=0.12 "Gray: ($reference_title) Average Monthly Rainfall"
+   annotate/norm/x=0/y=1.4/siz=0.12 "Dash: ($reference_title) Average Monthly Rainfall"
    
 endif
 

@@ -26,13 +26,15 @@ ENDIF
 
 
 !  Plot style for overlaying monthly reference data
-if `($reference)` then\   
-   define symbol graystyle = /nolab/color=(50,50,50)/dash=(0.05,0.05,0.05,0.05)/step=connected
-
+if `($reference)` then 
+   define symbol graydash = /nolab/color=(30,30,30)/dash=(0.3,0.1,0.3,0.01)/step=connected
+   define symbol graydash = /nolab/color=(30,30,30)/step=connected
+   define symbol whitedash = /nolab/color=(99,99,99)/dash=(0.04,0.04,0.04,0.04)/step=connected
+endif
 
 ! ----------------------
 ! Plotting a subset of the year - a few months before the current date
-! To set particular dates, set date1 and date2 after the call to date_range below
+! To set particular dates, set date1 and date2 after the call to range_of_dates below
 ! date1 must be before date 2, a range within a single calendar year
 
 define symbol smoothing = 6
@@ -43,7 +45,7 @@ define symbol date1 = 01-Jan
 define symbol date2 = 31-Dec
 
 let nmon = 2  ! start nmon months before the current month (end of record)
-GO date_range `nmon`
+GO range_of_dates `nmon`
 
 ! variable to plot and plot-style.
 let/like=($var)_day_($trans) var = ($var)_day_($trans)
@@ -135,7 +137,7 @@ set view fullmod
 define axis/t=0:365.2425/edges/npoints=365/t0=1-jan-0001/units=days/modulo tdaily
 let/like=($var)_day_($trans) dailyclim=($var)_day_($trans)[gt=tdaily@mod]
 
-plot/color=black/axes=0,0,0,0/nolab/vlim=`ax_lo`:`ax_hi` dailyclim
+plot/color=black/thick/axes=0,0,0,0/nolab/vlim=`ax_lo`:`ax_hi` dailyclim
 pause
 
  
@@ -271,14 +273,17 @@ annotate/norm/x=0.5/y=1.2/halign=0/siz=0.2 "($plot_annotation)"
 if `($reference)` then
    use ($reference_data)
    if ($trans"0|max>1|*>0") then 
-      plot/over($graystyle) temp_hi[gt=tmonth]
+      plot/over($graydash) temp_hi[gt=tmonth]
+      plot/over($whitedash) temp_hi[gt=tmonth]
    elif ($trans"0|min>1|*>0") then
-      plot/over($graystyle) temp_lo[gt=tmonth]
+      plot/over($graydash) temp_lo[gt=tmonth]
+      plot/over($whitedash) temp_lo[gt=tmonth]
    elif ($trans"0|diff>1|*>0") then
-      plot/over($graystyle) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
+      plot/over($graydash) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
+      plot/over($whitedash) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
    endif
 
-   annotate/norm/x=0/y=1.4/siz=0.12 "Gray: ($reference_title) Monthly Average"
+   annotate/norm/x=0/y=1.4/siz=0.12 "Dash: ($reference_title) Monthly Average"
 
    cancel data ($reference_data)
    set data 1
@@ -316,11 +321,14 @@ if `($reference)` then
 
    use ($reference_data)
    if ($trans"0|max>1|*>0") then 
-      plot/over($graystyle) temp_hi[gt=tmonth]
+      plot/over($graydash) temp_hi[gt=tmonth]
+      plot/over($whitedash) temp_hi[gt=tmonth]
    elif ($trans"0|min>1|*>0") then
-      plot/over($graystyle) temp_lo[gt=tmonth]
+      plot/over($graydash) temp_lo[gt=tmonth]
+      plot/over($whitedash) temp_lo[gt=tmonth]
    elif ($trans"0|diff>1|*>0") then
-      plot/over($graystyle) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
+      plot/over($graydash) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
+      plot/over($whitedash) temp_hi[gt=tmonth] - temp_lo[gt=tmonth]
    endif
    cancel data ($reference_data)
 
