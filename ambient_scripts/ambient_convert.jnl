@@ -39,7 +39,7 @@ if ($4"0") THEN
 endif
 
 IF ($month"0|Nov>1|*>0") THEN 
-  message "When changing from Daylight to Standard time, the data repeats the hour from 1AM to 2AM.  Edit out this hour"
+  message "When changing from Daylight to Standard time, the times repeat the hour from 1AM to 2AM.  Edit out this hour"
 ENDIF
 
 
@@ -115,15 +115,6 @@ let time_o = substring(dater_in, 12, 8)
 list/append/file="data/($monthyear)_dates_incr.dat"/\
 form=(a10,a10,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2)/norow/nohead \
  date_o,time_o,otr,feelr,dewr,wspdr,wgustr,wgustmaxr,wdirr,itr,hrr,drr,rpr,hum,uv,sol
-
-IF `substring(date_o[i=1],6,2) eq "11"` THEN
- say
-   say Edit the resulting file  data/($monthyear)_dates_incr.dat. Look for duplicate
-   say times due to the end of daylight savings time. Edit those out.
-   message hit return when done.
- say
-ENDIF
-
 
 ENDIF  ! rewrite
 
