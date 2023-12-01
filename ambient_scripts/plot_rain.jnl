@@ -248,7 +248,7 @@ IF ($reference) THEN  ! overlay dashed line for the reference data
 
    let/like=rain[d=2] Reference = rain[d=2, gt=tmonth]
    plot/over($graystyle) Reference
-   annotate/norm/x=0/y=1.4/siz=0.12 "Dash: ($reference_title) Average Monthly Rainfall"
+   annotate/norm/x=-0.1/y=1.4/siz=0.08 "Dash: ($reference_title) Average Monthly Rainfall"
    
 endif
 
@@ -272,7 +272,7 @@ IF ($reference) THEN
 
    say
    say Month      MonthRain YearAccum   Month Rain  YearAccum
-   say Month      Clinton   Clinton     ($reference_name)       ($reference_name)
+   say            Clinton   Clinton     ($reference_name)       ($reference_name)
    say
 
    list($list_quals)/t=($timerange) modate, month_rain, rainsum, ($reference_name), ($reference_name)sum
@@ -341,12 +341,15 @@ annotate/norm/x=0.5/y=-0.17/siz=0.12/halign=0 "($year_sums)"
 
 ! -------------- List monthly data --------------
 
-let tm = t[gt=monthly]
-let modate = TAX_DATESTRING(tm, tm, "month")
 
 define symbol var_title = Monthly Average `($var),return=title`
+let tm = t[gt=month_irreg]
+let modate = TAX_DATESTRING(tm, tm, "month")
 
-
+say
+say
+say Month totals for all years
+say
 IF ($reference) THEN
 
    use data/everett_climatology.nc
@@ -359,6 +362,13 @@ IF ($reference) THEN
    cancel symbol comma
    cancel symbol varlist
 
+   say
+   say  .       2020   2021   2022   2023     Paine  Seatac
+   say
+
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f9.1, f7.1)
+
+
    repeat/range=1:`ny`/name=yy (\
    let/title="Ambient ($var_title) `yr`" Y`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
    define symbol varlist = ($varlist)($comma)Y`yr`;\
@@ -369,7 +379,7 @@ IF ($reference) THEN
    let/like=rain[d=2] Paine = rain[d=2]
    let/like=rain[d=3] Seatac = rain[d=3]
 
-   list ($varlist), Paine, Seatac
+   list($list_quals)  modate, ($varlist), Paine, Seatac
 
 else
 
@@ -377,6 +387,14 @@ else
    let yr = firsty
    cancel symbol comma
    cancel symbol varlist
+   
+   say
+   say  .       2020   2021   2022   2023
+   say
+
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1)
+
+
 
    repeat/range=1:`ny`/name=yy (\
    let/title="Ambient ($var_title) `yr`" Y`yr` = reshape(month_rain[L=`m1`:`m1+11`], t[gt=month_irreg]);\
@@ -384,7 +402,7 @@ else
    define symbol comma = ,;\
    let m1 = `m1+12`;\
    let yr = `yr+1`)
-   list ($varlist)
+   list($list_quals) modate, ($varlist)
 
 endif
 
