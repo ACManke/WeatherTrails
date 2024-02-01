@@ -1,0 +1,49 @@
+[{
+  "dateTime" : "01/13/24 20:01:30",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "01/13/24 20:25:08",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "01/13/24 20:28:39",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "01/13/24 20:29:01",
+  "value" : {
+    "bpm" : 71,
+    "confidence" : 1
+  }
+},{
+  "dateTime" : "01/13/24 21:24:17",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "01/13/24 22:18:54",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "01/13/24 22:53:11",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "01/14/24 00:42:27",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+}]

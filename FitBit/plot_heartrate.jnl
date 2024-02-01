@@ -1,0 +1,34 @@
+! Edit the heart_rate*.json files to be a blank-delimited text file of this form,
+! (nothing at start of line).
+!
+!	date time bpm confidence
+!	01/24/24 08:07:52 70 0
+!	01/24/24 09:02:30 70 0
+!	01/24/24 09:57:07 70 0
+!	01/24/24 18:58:15 70 0
+
+cancel data/all
+cancel var/all
+
+define symbol filename = ($1"heart_rate-2024-01-24")
+
+
+columns/skip=1/delim=" " data/($filename).txt
+
+! 8 when in standard time or
+! 7 when in daylight savings time
+
+let hours_gmt = 8  
+
+! Define time axis, day + fraction of day
+
+let tt =v1 + (v2-hours_gmt)/24
+define axis/t0=1-jan-1900/units=days taxis = tt
+let times = t[gt=taxis]
+
+let/title="Heart Rate"/units="bpm" heartrate = reshape(v3, times)
+plot/grat=(color=(80,80,80))/color=blue/vlim=50:170 heartrate
+
+stat heartrate
+
+save/clobber/file="data/($filename).nc" heartrate

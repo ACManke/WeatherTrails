@@ -1,0 +1,8 @@
+Download all data from Fitbit via Google Takeout.
+
+The heartrate data is in 'Global Export Data/heart_rate*.json
+
+Copy these files into my local directory data/  
+Put the zip file into Downloads and get rid of directory Takeout
+
+

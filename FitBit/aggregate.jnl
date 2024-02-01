@@ -1,0 +1,11 @@
+ ! NOAA/PMEL TMAP
+ ! PyFerret v7.65 (debug)
+ ! Linux 4.4.0-22621-Microsoft - 09/27/23
+ ! 30-Jan-24 11:17     
+
+set mode verify
+let filelist = spawn("ls -1 data/heart_rate*.nc")
+tseries bpm = filelist
+set win/asp=0.5
+plot/grat=(color=(80,80,80))/color=blue heartrate
+q

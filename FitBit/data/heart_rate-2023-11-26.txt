@@ -1,0 +1,2 @@
+date time bpm confidence
+11/26/23 19:25:58 70 0

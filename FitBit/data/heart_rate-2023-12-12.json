@@ -1,0 +1,43 @@
+[{
+  "dateTime" : "12/12/23 08:42:53",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "12/12/23 09:37:32",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "12/12/23 19:19:27",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "12/12/23 20:14:06",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "12/12/23 20:42:07",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "12/12/23 21:36:59",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+},{
+  "dateTime" : "12/12/23 22:31:34",
+  "value" : {
+    "bpm" : 70,
+    "confidence" : 0
+  }
+}]
