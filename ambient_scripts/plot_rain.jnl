@@ -350,6 +350,7 @@ say
 say
 say Month totals for all years
 say
+
 IF ($reference) THEN
 
    use data/everett_climatology.nc
@@ -363,10 +364,10 @@ IF ($reference) THEN
    cancel symbol varlist
 
    say
-   say  .       2020   2021   2022   2023     Paine  Seatac
+   say  .       2020   2021   2022   2023   2024     Paine  Seatac
    say
 
-   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f9.1, f7.1)
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1, f9.1, f7.1)
 
 
    repeat/range=1:`ny`/name=yy (\
@@ -389,10 +390,10 @@ else
    cancel symbol varlist
    
    say
-   say  .       2020   2021   2022   2023
+   say  .       2020   2021   2022   2023   2024
    say
 
-   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1)
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1)
 
 
 
