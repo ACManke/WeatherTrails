@@ -272,7 +272,7 @@ IF ($reference) THEN
 
    say
    say Month      MonthRain YearAccum   Month Rain  YearAccum
-   say            Clinton   Clinton     ($reference_name)       ($reference_name)
+   say "           Clinton   Clinton     ($reference_name)       ($reference_name)"
    say
 
    list($list_quals)/t=($timerange) modate, month_rain, rainsum, ($reference_name), ($reference_name)sum
@@ -364,7 +364,7 @@ IF ($reference) THEN
    cancel symbol varlist
 
    say
-   say  .       2020   2021   2022   2023   2024     Paine  Seatac
+   say  "       2020   2021   2022   2023   2024     Paine  Seatac"
    say
 
    define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1, f9.1, f7.1)
@@ -390,7 +390,7 @@ else
    cancel symbol varlist
    
    say
-   say  .       2020   2021   2022   2023   2024
+   say  "       2020   2021   2022   2023   2024"
    say
 
    define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1)
