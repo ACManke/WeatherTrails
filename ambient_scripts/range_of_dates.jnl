@@ -20,7 +20,7 @@ DEFINE SYMBOL date2 = `SUBSTRING(UPCASE("($date2)"), 1, 6)`
 
 let thismonth = "`SUBSTRING("($date2)", 4, 3)`"
 
-let monthnames = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
+let monthnames = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"}
 let monthnum = ELEMENT_INDEX_STR(thismonth, monthnames)
 
 IF `monthnum GE (nmon+1)` THEN
