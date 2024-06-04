@@ -1,0 +1,60 @@
+! ambient_daily.jnl
+! Aggregate the full data set and regrid temperature to the daily axis
+
+cancel mode logo
+
+! Open the monthly datasets, aggregating in time
+go ambient_aggregate.jnl
+show data/brief
+show grid temperature
+
+LET tt = t[gt=temperature]
+
+LET nt = `tt,return=size`
+
+LET firsty = `tax_datestring(tt[L=1], tt, "year")`
+LET lasty_s = tax_datestring(tt[L=`nt`], tt, "year")
+LET lasty = `lasty_s`
+
+LET ny = lasty - firsty + 1
+
+
+define axis/t=1-nov-`firsty-1`:1-jan-`lasty+1`:1/edges/units=days tday
+
+let/like=temperature/title="`temperature,return=title` Max" temperature_day_max = temperature[gt=tday@max]
+let/like=temperature/title="`temperature,return=title` Min" temperature_day_min = temperature[gt=tday@min]
+
+show var temperature_day*
+
+set window/asp=.5/siz=2
+plot/color=red/vlim=10:110/title="Outdoor Temperature Max and Min" temperature_day_max
+plot/over/nolab/color=blue temperature_day_min
+
+pause
+
+
+set win/new/size=2
+
+define view/x=0:1/y=0:1 v2021
+define view/x=0:1/y=0:1 v2022
+define view/x=0:1/y=0:1 v2023
+let/like=temperature_day_max var = temperature_day_max[L=@SBX:5]
+
+set view v2021
+plot/vlim=50:90/t=1-jun-2021:30-jun-2021/color=red var
+set view v2022
+plot/nolab/vlim=50:90/t=1-jun-2022:30-jun-2022/color=blue var
+set view v2023
+plot/nolab/vlim=50:90/t=1-jun-2023:30-jun-2023/color=green var
+
+pause
+set win/new/size=2
+let/like=temperature_day_min var = temperature_day_min[L=@SBX:5]
+
+set view v2021
+plot/vlim=40:70/t=1-jun-2021:30-jun-2021/color=red var
+set view v2022
+plot/nolab/vlim=40:70/t=1-jun-2022:30-jun-2022/color=blue var
+set view v2023
+plot/nolab/vlim=40:70/t=1-jun-2023:30-jun-2023/color=green var
+
