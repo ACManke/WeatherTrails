@@ -18,34 +18,36 @@
 
 ! Input arguments: 
 !   1    file name, e.g. ambient-weather-20210601-20210630, without the .csv, in the data/ directory
-!   2    Month name for creating the output file name, e.g. June.
-!   3    Year  for creating the output file name, e.g. 2021
-!   4    1 to read using the older format, without "simple date", 0 or not included otherwise
+!   2    1 to read using the older format, without "simple date", 0 or not included otherwise
 
 ! Example: 
-!    go ambient_convert.jnl ambient-weather-20201201-20201231 December 2020 1
+!    go ambient_convert.jnl ambient-weather-20201201-20201231 1
+!    go ambient_convert.jnl ambient-weather-20230901-20230930
 
 cancel data/all
 cancel variable/all
 cancel symbol/all
 
 
-define symbol infile = ($1).csv
-define symbol month = ($2)
-define symbol year = ($3)
-define symbol old = 0
-if ($4"0") THEN 
-   define symbol old = ($4"0|1|*>0")
-endif
+define symbol inname = ($1)
+define symbol infile = ($inname).csv
 
-IF ($month"0|Nov>1|*>0") THEN 
+define symbol year = `substring("($infile)", 17, 4)`
+define symbol nmon = `substring("($infile)", 21, 2)`
+let monthnames = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"}
+define symbol month = `monthnames[i=($nmon)]`
+
+IF ($nmon"0|11>1|*>0") THEN 
   message "When changing from Daylight to Standard time, the times repeat the hour from 1AM to 2AM.  Edit out this hour"
 ENDIF
 
+define symbol tempfile ($inname)_temp.dat
+define symbol outfile = ($inname).nc
 
-define symbol outfile = ($1).nc
-
-define symbol monthyear ($month)($year)
+define symbol old = 0
+if ($2"0") THEN 
+   define symbol old = ($2"0|1|*>0")
+endif
 
 ! Change the value of 'rewrite' to 0 if the file has already been rewritten and we're starting after
 ! the edit of the dates_incr file.
@@ -80,14 +82,14 @@ endif
 
 ! Write date/time, variables we are keeping, in increasing time order to a new csv file
 
-say/clobber/outfile="data/($monthyear)_dates_incr.dat" "($month) ($year) Dates Increasing: Date,Temperature,Feels Like,Dew Point,Wind Speed,Wind Gust,Max Daily Gust, Wind Direction, Indoor Temperature, Hourly Rain, Daily Rain, RelativePressure, Humidity"
+say/clobber/outfile="data/($tempfile)" "($month) ($year) Dates Increasing: Date,Temperature,Feels Like,Dew Point,Wind Speed,Wind Gust,Max Daily Gust, Wind Direction, Indoor Temperature, Hourly Rain, Daily Rain, RelativePressure, Humidity"
 
 
 let nr = `date,return=isize`
 
 cancel mode verify
 say
-say file ($1).csv
+say file ($inname).csv
 say Listing `nr` timesteps in increasing time order...
 say
 
@@ -112,7 +114,7 @@ let sol = xreverse(missing(SolarRadiation,999))
 let date_o = substring(dater_in, 1, 10)
 let time_o = substring(dater_in, 12, 8)
 
-list/append/file="data/($monthyear)_dates_incr.dat"/\
+list/append/file="data/($tempfile)"/\
 form=(a10,a10,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2)/norow/nohead \
  date_o,time_o,otr,feelr,dewr,wspdr,wgustr,wgustmaxr,wdirr,itr,hrr,drr,rpr,hum,uv,sol
 
@@ -124,7 +126,7 @@ ENDIF  ! rewrite
 cancel data/all
 file/delim=" "/skip=1/type="date,time,num,num,num,num,num,num,num,num,num,num,num,num,num,num"/var=\
 "date,time,ot_in,fee_in,dew_in,wspd_in,wgust_in,wgustmax_in,wdir_in,it_in,hr_in,dr_in,\
-pres_in,hum_in,uv_in,sol_in"/form=delim data/($monthyear)_dates_incr.dat
+pres_in,hum_in,uv_in,sol_in"/form=delim data/($tempfile)
 
 ! Define the time axis from the dates 
 ! Save as a netCDF file.
@@ -186,5 +188,3 @@ plot Hourly_Rain, Daily_Rain
 
 plot/thick/color=blue/vlim=($yaxis_min):($yaxis_max) Hourly_Rain
 plot/over/nolab/thick/color=green/thick Daily_Rain
-
-sp sleep 1
