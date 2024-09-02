@@ -421,7 +421,7 @@ else
    let yr = `yr+1`)
    list ($varlist)
 
-   list/append/file=($summary_file)  ($varlist), Paine, Seatac
+   list/append/file=($summary_file)  ($varlist)
 endif
 
 say 
