@@ -1,3 +1,5 @@
+\cancel mode verify
+
 ! Ambient Weather 
 ! 
 ! Export a month of data.  
@@ -38,7 +40,7 @@ let monthnames = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep",
 define symbol month = `monthnames[i=($nmon)]`
 
 IF ($nmon"0|11>1|*>0") THEN 
-  message "When changing from Daylight to Standard time, the times repeat the hour from 1AM to 2AM.  Edit out this hour"
+  message "When changing from Daylight to Standard time, the times repeat the hour from 1AM to 2AM.  Edit out this fset"
 ENDIF
 
 define symbol tempfile ($inname)_temp.dat
