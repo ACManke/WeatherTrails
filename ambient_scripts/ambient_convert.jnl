@@ -11,8 +11,10 @@
 ! Look at the file permissions, will need to change them to rw
 ! 
 ! They come out in reverse time order most-recent-first.
-! The times are listed as 2021-06-30T23:55:00-07:00 - so GMT with an offset of 7 hours 
-! for Daylight Time, or 8 for Standard Time
+! The times are listed as 2021-06-30T23:55:00-07:00 - so GMT with an offset of 7 hours for Daylight 
+! Time, or 8 for Standard Time. When changing from Daylight to Standard time, the hour from 1AM to 
+! 2AM is repeated. Will need to edit out the repeat in the .csv file. This script gives an error 
+! message with the line number in the .dat file that it writes.
 !
 ! This script opens the file, reads and reverses the order, writing a new csv file.  The 
 ! script coaches some editing of the file for minor reformatting. Then define the time 
@@ -39,9 +41,9 @@ define symbol nmon = `substring("($infile)", 21, 2)`
 let monthnames = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"}
 define symbol month = `monthnames[i=($nmon)]`
 
-IF ($nmon"0|11>1|*>0") THEN 
-  message "When changing from Daylight to Standard time, the times repeat the hour from 1AM to 2AM.  Edit out this fset"
-ENDIF
+! IF ($nmon"0|11>1|*>0") THEN 
+!   message "When changing from Daylight to Standard time, the times repeat the hour from 1AM to 2AM.  Edit out this fset"
+! ENDIF
 
 define symbol tempfile ($inname)_temp.dat
 define symbol outfile = ($inname).nc
@@ -120,6 +122,7 @@ list/append/file="data/($tempfile)"/\
 form=(a10,a10,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2,f8.2)/norow/nohead \
  date_o,time_o,otr,feelr,dewr,wspdr,wgustr,wgustmaxr,wdirr,itr,hrr,drr,rpr,hum,uv,sol
 
+
 ENDIF  ! rewrite
 
 ! Read this file and define the time axis.
@@ -130,10 +133,26 @@ file/delim=" "/skip=1/type="date,time,num,num,num,num,num,num,num,num,num,num,nu
 "date,time,ot_in,fee_in,dew_in,wspd_in,wgust_in,wgustmax_in,wdir_in,it_in,hr_in,dr_in,\
 pres_in,hum_in,uv_in,sol_in"/form=delim data/($tempfile)
 
+
 ! Define the time axis from the dates 
 ! Save as a netCDF file.
 
+set mode ignore  ! so that we can issue a note about returning to Standard Time
+
 define axis/t/t0=1-jan-1900/units=days taxis = date + time/24
+
+IF ($fer_last_error%0|*>1%) THEN
+   IF ($nmon"0|11>1|*>0") THEN 
+      SAY
+      SAY "When changing from Daylight to Standard time, the hour from 1AM to 2AM is repeated.  Edit out the repeat in data/($infile)"
+      SAY
+   ENDIF
+
+   EXIT/SCRIPT
+
+ENDIF
+
+cancel mode ignore
 
 set var/bad=999 ot_in
 set var/bad=999 fee_in
