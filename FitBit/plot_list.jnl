@@ -1,0 +1,9 @@
+go plot_heartrate heart_rate-2024-11-14 ; pause
+go plot_heartrate heart_rate-2024-11-18 ; pause
+go plot_heartrate heart_rate-2024-11-25 ; pause
+go plot_heartrate heart_rate-2024-11-27 ; pause
+go plot_heartrate heart_rate-2024-11-28 ; pause
+go plot_heartrate heart_rate-2024-12-05 ; pause
+go plot_heartrate heart_rate-2024-12-06 ; pause
+go plot_heartrate heart_rate-2024-12-07 ; pause
+go plot_heartrate heart_rate-2024-12-11 ; pause

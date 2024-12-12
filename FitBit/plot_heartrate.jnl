@@ -7,6 +7,9 @@
 !	01/24/24 09:57:07 70 0
 !	01/24/24 18:58:15 70 0
 
+! If there are a bunch of lines with 0 confidence at the start and end of the 
+! file, remove them. Check the end of file for closing tags and remove those.
+
 cancel data/all
 cancel var/all
 
@@ -23,10 +26,14 @@ let hours_gmt = 8
 ! Define time axis, day + fraction of day
 
 let tt =v1 + (v2-hours_gmt)/24
+
 define axis/t0=1-jan-1900/units=days taxis = tt
 let times = t[gt=taxis]
 
-let/title="Heart Rate"/units="bpm" heartrate = reshape(v3, times)
+! If confidence is 0 do not use the data
+let zero = if v4 eq 0 then 0 else 1
+
+let/title="Heart Rate"/units="bpm"/bad=0 heartrate = reshape(zero*v3, times)
 plot/grat=(color=(80,80,80))/color=blue/vlim=50:170 heartrate
 
 stat heartrate
