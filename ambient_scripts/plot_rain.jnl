@@ -377,15 +377,15 @@ IF ($reference) THEN
    cancel symbol varlist
 
    say
-   say  "       2020   2021   2022   2023   2024     Paine  Seatac"
+   say  "       2020   2021   2022   2023   2024   2025     Paine  Seatac"
    say
 
    say/append/outfile=($summary_file) " "
-   say/append/outfile=($summary_file) "       2020   2021   2022   2023   2024     Paine  Seatac"
+   say/append/outfile=($summary_file) "       2020   2021   2022   2023   2024   2025     Paine  Seatac"
    say/append/outfile=($summary_file) " "
 
 
-   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1, f9.1, f7.1)
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1, f7.1, f9.1, f7.1)
 
 
    repeat/range=1:`ny`/name=yy (\
@@ -409,10 +409,10 @@ else
    cancel symbol varlist
    
    say
-   say  "       2020   2021   2022   2023   2024"
+   say  "       2020   2021   2022   2023   2024   2025"
    say
 
-   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1)
+   define symbol list_quals = /nohead/norow/prec=3/format=(a, f9.1, f7.1, f7.1, f7.1, f7.1, f7.1)
 
 
 
